@@ -10,15 +10,33 @@ on:
 
 jobs:
   assemble:
-    if: ${{ hashFiles('apps/android/gradlew') != '' }}
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/android
     steps:
       - uses: actions/checkout@v4
+
+      - name: Detect gradlew
+        id: detect
+        run: |
+          if [ -f ./gradlew ]; then
+            echo "present=true" >> $GITHUB_OUTPUT
+          else
+            echo "present=false" >> $GITHUB_OUTPUT
+          fi
+
       - uses: gradle/actions/setup-gradle@v4
+        if: ${{ steps.detect.outputs.present == 'true' }}
+
       - name: Grant execute permission for gradlew
+        if: ${{ steps.detect.outputs.present == 'true' }}
         run: chmod +x ./gradlew
+
       - name: Assemble Debug
+        if: ${{ steps.detect.outputs.present == 'true' }}
         run: ./gradlew :app:assembleDebug
+
+      - name: Skip (Android project not present yet)
+        if: ${{ steps.detect.outputs.present != 'true' }}
+        run: echo "No gradlew found under apps/android; skipping build."
