@@ -1,13 +1,16 @@
 ﻿name: android
 on:
   pull_request:
-    paths: ["apps/android/**", ".github/workflows/android.yml"]
+    paths:
+      - "apps/android/**"
   push:
     branches: [main]
-    paths: ["apps/android/**", ".github/workflows/android.yml"]
+    paths:
+      - "apps/android/**"
 
 jobs:
   assemble:
+    if: ${{ hashFiles('apps/android/gradlew') != '' }}
     runs-on: ubuntu-latest
     defaults:
       run:
