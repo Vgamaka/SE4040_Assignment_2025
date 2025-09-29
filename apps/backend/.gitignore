@@ -1,0 +1,2 @@
+﻿# keep developer-specific settings out of git
+#appsettings.Development.json
