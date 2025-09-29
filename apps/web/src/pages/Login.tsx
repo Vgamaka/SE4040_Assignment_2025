@@ -8,8 +8,6 @@ export default function Login() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // For demo, any email/password combination works
-    // Replace with real authentication later
     if (email && password) {
       navigate("/dashboard");
     } else {
@@ -18,33 +16,53 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded shadow-md w-80"
-      >
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
+      <div className="w-full max-w-md">
+        <form
+          onSubmit={handleLogin}
+          className="bg-white p-10 rounded-2xl shadow-lg flex flex-col gap-6"
         >
-          Login
-        </button>
-      </form>
+          <h1 className="text-3xl font-extrabold text-center text-blue-600">
+            Welcome Back
+          </h1>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-gray-600 font-medium">Email</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-gray-600 font-medium">Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-500 to-green-500 text-white font-semibold py-3 rounded-xl hover:from-blue-600 hover:to-green-600 shadow-md transition"
+          >
+            Login
+          </button>
+
+          <p className="text-center text-gray-500 text-sm">
+            Don’t have an account?{" "}
+            <span className="text-blue-600 font-medium hover:underline cursor-pointer">
+              Sign Up
+            </span>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }
