@@ -22,11 +22,18 @@ builder.Services.AddSingleton<IMongoDatabase>(mongoDatabase);
 // ==========================
 // 🔹 Register Repositories & Services
 // ==========================
+// Repositories
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<EvOwnerRepository>();
 builder.Services.AddScoped<StationRepository>();
 builder.Services.AddScoped<BookingRepository>();
+builder.Services.AddSingleton<SessionRepository>(); // REQUIRED for SessionsController
+
+// Services
 builder.Services.AddSingleton<JwtTokenService>();
+builder.Services.AddScoped<BookingService>();
+// (Optional) If you later wire StationController to StationService for deactivate guard, also register:
+builder.Services.AddScoped<StationService>();
 
 // ==========================
 // 🔹 CORS (for Vite dev server)
@@ -41,7 +48,10 @@ builder.Services.AddCors(o => o.AddPolicy("AppCors", p =>
 // 🔹 Authentication (JWT)
 // ==========================
 var jwtSection = builder.Configuration.GetSection("Jwt");
-var secret = jwtSection["Secret"] ?? "dev-secret-change-me-please-32chars-min";
+var secret   = jwtSection["Secret"]   ?? "dev-secret-change-me-please-32chars-min";
+var issuer   = jwtSection["Issuer"]   ?? "default-issuer";     // <- fallback matches JwtTokenService
+var audience = jwtSection["Audience"] ?? "default-audience";   // <- fallback matches JwtTokenService
+
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
 
 builder.Services
@@ -60,8 +70,8 @@ builder.Services
             ValidateAudience         = true,
             ValidateLifetime         = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer              = jwtSection["Issuer"],
-            ValidAudience            = jwtSection["Audience"],
+            ValidIssuer              = issuer,
+            ValidAudience            = audience,
             IssuerSigningKey         = signingKey,
             ClockSkew                = TimeSpan.FromSeconds(5)
         };
@@ -121,6 +131,7 @@ var app = builder.Build();
 // ==========================
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
