@@ -3,46 +3,42 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Models
 {
-    /// <summary>
-    /// Represents an EV charging station.
-    /// </summary>
+    [BsonIgnoreExtraElements] // 👈 ignore fields not in this class (e.g., latitude)
     public class ChargingStation
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }   // ✅ Nullable → MongoDB generates ID
+        public string? Id { get; set; }
 
         [BsonElement("name")]
         public string? Name { get; set; }
 
         [BsonElement("location")]
-        public string? Location { get; set; }  // e.g. GPS address or description
+        public string? Location { get; set; }  // human-readable address/area
 
         [BsonElement("type")]
-        public string? Type { get; set; }  // e.g. "AC" or "DC"
+        public string? Type { get; set; }      // "AC" or "DC"
 
         [BsonElement("availableSlots")]
         public int AvailableSlots { get; set; }
 
         [BsonElement("schedule")]
-        public List<StationSchedule> Schedule { get; set; } = new List<StationSchedule>();
+        public List<StationSchedule> Schedule { get; set; } = new();
 
         [BsonElement("isActive")]
         public bool IsActive { get; set; } = true;
     }
 
-    /// <summary>
-    /// Represents the availability schedule for a charging station.
-    /// </summary>
+    [BsonIgnoreExtraElements] // 👈 also safe for schedule docs
     public class StationSchedule
     {
         [BsonElement("dayOfWeek")]
-        public string? DayOfWeek { get; set; }  // e.g. "Monday"
+        public string? DayOfWeek { get; set; }
 
         [BsonElement("openTime")]
-        public string? OpenTime { get; set; }   // e.g. "08:00"
+        public string? OpenTime { get; set; }
 
         [BsonElement("closeTime")]
-        public string? CloseTime { get; set; }  // e.g. "20:00"
+        public string? CloseTime { get; set; }
     }
 }
