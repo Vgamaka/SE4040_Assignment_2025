@@ -1,3 +1,44 @@
+// using backend.Models;
+// using MongoDB.Driver;
+
+// namespace backend.Repositories
+// {
+//     public class EvOwnerRepository
+//     {
+//         private readonly IMongoCollection<EvOwner> _owners;
+
+//         public EvOwnerRepository(IMongoDatabase database)
+//         {
+//             _owners = database.GetCollection<EvOwner>("evowners");
+//         }
+
+//         public async Task<List<EvOwner>> GetAllAsync()
+//         {
+//             return await _owners.Find(_ => true).ToListAsync();
+//         }
+
+//         public async Task<EvOwner?> GetByNICAsync(string nic)
+//         {
+//             return await _owners.Find(o => o.NIC == nic).FirstOrDefaultAsync();
+//         }
+
+//         public async Task CreateAsync(EvOwner owner)
+//         {
+//             await _owners.InsertOneAsync(owner);
+//         }
+
+//         public async Task UpdateAsync(string nic, EvOwner updatedOwner)
+//         {
+//             await _owners.ReplaceOneAsync(o => o.NIC == nic, updatedOwner);
+//         }
+
+//         public async Task DeleteAsync(string nic)
+//         {
+//             await _owners.DeleteOneAsync(o => o.NIC == nic);
+//         }
+//     }
+// }
+
 using backend.Models;
 using MongoDB.Driver;
 
@@ -12,29 +53,24 @@ namespace backend.Repositories
             _owners = database.GetCollection<EvOwner>("evowners");
         }
 
-        public async Task<List<EvOwner>> GetAllAsync()
-        {
-            return await _owners.Find(_ => true).ToListAsync();
-        }
+        // === Basic CRUD ===
+        public async Task<List<EvOwner>> GetAllAsync() =>
+            await _owners.Find(_ => true).ToListAsync();
 
-        public async Task<EvOwner?> GetByNICAsync(string nic)
-        {
-            return await _owners.Find(o => o.NIC == nic).FirstOrDefaultAsync();
-        }
+        public async Task<EvOwner?> GetByNICAsync(string nic) =>
+            await _owners.Find(o => o.NIC == nic).FirstOrDefaultAsync();
 
-        public async Task CreateAsync(EvOwner owner)
-        {
+        public async Task CreateAsync(EvOwner owner) =>
             await _owners.InsertOneAsync(owner);
-        }
 
-        public async Task UpdateAsync(string nic, EvOwner updatedOwner)
-        {
+        public async Task UpdateAsync(string nic, EvOwner updatedOwner) =>
             await _owners.ReplaceOneAsync(o => o.NIC == nic, updatedOwner);
-        }
 
-        public async Task DeleteAsync(string nic)
-        {
+        public async Task DeleteAsync(string nic) =>
             await _owners.DeleteOneAsync(o => o.NIC == nic);
-        }
+
+        // === Extra helper (alias for clarity in services/controllers) ===
+        public async Task<EvOwner?> FindByNicAsync(string nic) =>
+            await GetByNICAsync(nic);
     }
 }
