@@ -202,6 +202,22 @@ namespace backend.Controllers
             return Ok(bookings);
         }
 
+        // ✅ Owner booking summary: pending (future), approvedFuture (future), completed (all-time)
+        [HttpGet("owner/{nic}/summary")]
+        public async Task<IActionResult> GetOwnerSummary(string nic)
+        {
+            var pendingFuture   = await _bookingRepository.CountFutureByStatusAsync(nic, "Pending");
+            var approvedFuture  = await _bookingRepository.CountFutureByStatusAsync(nic, "Approved");
+            var completedAll    = await _bookingRepository.CountByStatusAsync(nic, "Completed");
+
+            return Ok(new
+            {
+                pending = pendingFuture,
+                approvedFuture = approvedFuture,
+                completed = completedAll
+            });
+        }
+
         // ✅ Create a new booking with business rules
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Booking newBooking)
@@ -301,6 +317,7 @@ namespace backend.Controllers
 
         // ✅ Serve QR code as PNG for Android app
         [HttpGet("{id}/qr.png")]
+        [Produces("image/png")]
         public async Task<IActionResult> QrPng(string id)
         {
             var booking = await _bookingRepository.GetByIdAsync(id);

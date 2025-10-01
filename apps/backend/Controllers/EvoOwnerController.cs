@@ -99,6 +99,7 @@
 using backend.Models;
 using backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
@@ -185,6 +186,23 @@ namespace backend.Controllers
             owner.IsActive = false;
             await _evOwnerRepository.UpdateAsync(nic, owner);
             return Ok(new { message = "EV Owner account deactivated" });
+        }
+        // ✅ Reactivate EV Owner (Backoffice only)
+        [HttpPut("{nic}/reactivate")]
+        [Authorize(Policy = "BackofficeOnly")]
+        public async Task<IActionResult> Reactivate(string nic)
+        {
+            var owner = await _evOwnerRepository.GetByNICAsync(nic);
+            if (owner == null)
+                return NotFound(new { message = "EV Owner not found" });
+
+            if (owner.IsActive)
+                return Ok(new { message = "EV Owner is already active" });
+
+            owner.IsActive = true;
+            await _evOwnerRepository.UpdateAsync(nic, owner);
+
+            return Ok(new { message = "EV Owner account reactivated", nic = owner.NIC });
         }
 
         // (Optional) Delete EV Owner — mostly for testing

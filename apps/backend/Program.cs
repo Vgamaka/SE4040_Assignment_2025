@@ -1,4 +1,6 @@
 using System.Text;
+using System.Security.Claims;
+using System.Linq;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -22,17 +24,14 @@ builder.Services.AddSingleton<IMongoDatabase>(mongoDatabase);
 // ==========================
 // 🔹 Register Repositories & Services
 // ==========================
-// Repositories
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<EvOwnerRepository>();
 builder.Services.AddScoped<StationRepository>();
 builder.Services.AddScoped<BookingRepository>();
-builder.Services.AddSingleton<SessionRepository>(); // REQUIRED for SessionsController
+builder.Services.AddSingleton<SessionRepository>(); // for SessionsController
 
-// Services
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<BookingService>();
-// (Optional) If you later wire StationController to StationService for deactivate guard, also register:
 builder.Services.AddScoped<StationService>();
 
 // ==========================
@@ -45,12 +44,11 @@ builder.Services.AddCors(o => o.AddPolicy("AppCors", p =>
 ));
 
 // ==========================
-// 🔹 Authentication (JWT)
-// ==========================
+/* 🔹 Authentication (JWT) */
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var secret   = jwtSection["Secret"]   ?? "dev-secret-change-me-please-32chars-min";
-var issuer   = jwtSection["Issuer"]   ?? "default-issuer";     // <- fallback matches JwtTokenService
-var audience = jwtSection["Audience"] ?? "default-audience";   // <- fallback matches JwtTokenService
+var issuer   = jwtSection["Issuer"]   ?? "default-issuer";
+var audience = jwtSection["Audience"] ?? "default-audience";
 
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
 
@@ -73,7 +71,29 @@ builder.Services
             ValidIssuer              = issuer,
             ValidAudience            = audience,
             IssuerSigningKey         = signingKey,
-            ClockSkew                = TimeSpan.FromSeconds(5)
+            ClockSkew                = TimeSpan.FromSeconds(5),
+
+            // ✅ Treat ClaimTypes.Role as the role claim (your token already maps "role" → this)
+            RoleClaimType = ClaimTypes.Role,
+            NameClaimType = "unique_name"
+        };
+
+        // (optional) diagnostics during dev
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine($"[JWT] Auth failed: {ctx.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = ctx =>
+            {
+                var roles = string.Join(",", ctx.Principal?.Claims
+                    .Where(c => c.Type == "role" || c.Type == ClaimTypes.Role)
+                    .Select(c => $"{c.Type}:{c.Value}") ?? Array.Empty<string>());
+                Console.WriteLine($"[JWT] Token validated. Roles seen: {roles}");
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -101,14 +121,15 @@ builder.Services.AddSwaggerGen(opt =>
         Description = "Backend Web API for SE4040 EV Charging System (MongoDB Atlas + ASP.NET Core)"
     });
 
+    // ✅ HTTP Bearer: paste raw JWT (no 'Bearer ' prefix)
     opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Paste your JWT access token here. Do NOT include the 'Bearer ' prefix."
     });
+
     opt.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -141,9 +162,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AppCors");
-
-// (Optional in dev) Comment this out if it interferes with CORS due to redirects.
-// app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // optional in dev
 
 app.UseAuthentication();
 app.UseAuthorization();

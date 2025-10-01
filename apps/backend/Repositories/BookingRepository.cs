@@ -114,5 +114,14 @@ namespace backend.Repositories
                 b.OwnerNIC == ownerNic &&
                 b.EndUtc < DateTime.UtcNow)
                 .ToListAsync();
+                /// <summary>
+        /// Count bookings for an owner by exact status (no time filter).
+        /// </summary>
+        public async Task<long> CountByStatusAsync(string ownerNic, string status) =>
+            await _bookings.CountDocumentsAsync(b =>
+                b.OwnerNIC == ownerNic &&
+                b.Status == status);
+
     }
+    
 }
