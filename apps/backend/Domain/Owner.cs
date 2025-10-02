@@ -3,6 +3,37 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace EvCharge.Api.Domain
 {
+    public class BackOfficeProfile
+    {
+        [BsonElement("businessName")]
+        public string BusinessName { get; set; } = string.Empty;
+
+        [BsonElement("brn")]
+        public string? Brn { get; set; }
+
+        // NEW: contact details used by BackOfficeService
+        [BsonElement("contactEmail")]
+        public string ContactEmail { get; set; } = string.Empty;
+
+        [BsonElement("contactPhone")]
+        public string? ContactPhone { get; set; }
+
+        [BsonElement("applicationStatus")] // Pending|Approved|Rejected
+        public string ApplicationStatus { get; set; } = "Pending";
+
+        [BsonElement("submittedAtUtc")]
+        public DateTime SubmittedAtUtc { get; set; } = DateTime.UtcNow;
+
+        [BsonElement("reviewedAtUtc")]
+        public DateTime? ReviewedAtUtc { get; set; }
+
+        [BsonElement("reviewedByNic")]
+        public string? ReviewedByNic { get; set; }
+
+        [BsonElement("reviewNotes")]
+        public string? ReviewNotes { get; set; }
+    }
+
     public class Owner
     {
         [BsonId]
@@ -37,6 +68,17 @@ namespace EvCharge.Api.Domain
 
         [BsonElement("roles")]
         public List<string> Roles { get; set; } = new() { "Owner" };
+
+        // ----- BackOffice account (business application) -----
+        [BsonElement("backOfficeProfile")]
+        public BackOfficeProfile? BackOfficeProfile { get; set; }
+
+        // ----- Operator account linking & scoping -----
+        [BsonElement("backOfficeNic")]
+        public string? BackOfficeNic { get; set; }  // parent BackOffice NIC (for Operators)
+
+        [BsonElement("operatorStationIds")]
+        public List<string>? OperatorStationIds { get; set; }  // stations the Operator can manage
 
         [BsonElement("createdAtUtc")]
         public DateTime CreatedAtUtc { get; set; }

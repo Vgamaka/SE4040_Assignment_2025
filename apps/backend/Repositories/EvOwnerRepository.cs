@@ -10,7 +10,12 @@ namespace EvCharge.Api.Repositories
         Task<bool> ExistsByEmailLowerForDifferentNicAsync(string emailLower, string nic, CancellationToken ct);
         Task CreateAsync(Owner owner, CancellationToken ct);
         Task<Owner?> GetByNicAsync(string nic, CancellationToken ct);
+        Task<Owner?> GetByEmailLowerAsync(string emailLower, CancellationToken ct);
         Task<bool> ReplaceAsync(Owner owner, CancellationToken ct);
+
+        // NEW
+        Task<(List<Owner> items, long total)> ListOperatorsByBackOfficeAsync(string backOfficeNic, int page, int pageSize, CancellationToken ct);
+        Task<(List<Owner> items, long total)> ListBackOfficesByStatusAsync(string? status, int page, int pageSize, CancellationToken ct);
     }
 
     public class EvOwnerRepository : IEvOwnerRepository
@@ -52,10 +57,41 @@ namespace EvCharge.Api.Repositories
         public async Task<Owner?> GetByNicAsync(string nic, CancellationToken ct)
             => await _col.Find(x => x.Nic == nic).FirstOrDefaultAsync(ct);
 
+        public async Task<Owner?> GetByEmailLowerAsync(string emailLower, CancellationToken ct)
+            => await _col.Find(x => x.EmailLower == emailLower).FirstOrDefaultAsync(ct);
+
         public async Task<bool> ReplaceAsync(Owner owner, CancellationToken ct)
         {
             var res = await _col.ReplaceOneAsync(x => x.Nic == owner.Nic, owner, cancellationToken: ct);
             return res.ModifiedCount > 0;
+        }
+
+        // -------- NEW: queries for BackOffice and Operators --------
+        public async Task<(List<Owner> items, long total)> ListOperatorsByBackOfficeAsync(string backOfficeNic, int page, int pageSize, CancellationToken ct)
+        {
+            var fb = Builders<Owner>.Filter;
+            // Use a Where expression to avoid AnyEq generic headaches on some driver versions
+            var filter = fb.Where(o => o.Roles.Contains("Operator") && o.BackOfficeNic == backOfficeNic);
+
+            var find = _col.Find(filter);
+            var total = await find.CountDocumentsAsync(ct);
+            var items = await find.Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync(ct);
+            return (items, total);
+        }
+
+        public async Task<(List<Owner> items, long total)> ListBackOfficesByStatusAsync(string? status, int page, int pageSize, CancellationToken ct)
+        {
+            var fb = Builders<Owner>.Filter;
+            var filter = fb.Where(o => o.Roles.Contains("BackOffice") && o.BackOfficeProfile != null);
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                filter = fb.And(filter, fb.Eq(o => o.BackOfficeProfile!.ApplicationStatus, status));
+            }
+
+            var find = _col.Find(filter);
+            var total = await find.CountDocumentsAsync(ct);
+            var items = await find.Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync(ct);
+            return (items, total);
         }
     }
 }

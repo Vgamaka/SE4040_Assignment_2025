@@ -3,6 +3,7 @@ using EvCharge.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using EvCharge.Api.Infrastructure.Errors;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace EvCharge.Api.Controllers
 {
@@ -17,7 +18,7 @@ namespace EvCharge.Api.Controllers
             _service = service;
         }
 
-        /// <summary>Create a new station (BackOffice/Admin).</summary>
+        /// <summary>Create a new station (BackOffice/Admin). If caller is BackOffice, station is stamped to that BackOffice.</summary>
         [Authorize(Roles = "BackOffice,Admin")]
         [HttpPost]
         [ProducesResponseType(typeof(StationResponse), StatusCodes.Status201Created)]
@@ -26,13 +27,18 @@ namespace EvCharge.Api.Controllers
         {
             try
             {
-                var actor = User.Identity?.Name ?? "system";
-                var res = await _service.CreateAsync(req, actor, ct);
+                var actorNic = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? User.Identity?.Name ?? "system";
+                var isBackOffice = User.IsInRole("BackOffice");
+                var res = await _service.CreateAsync(req, actorNic, isBackOffice, ct);
                 return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);
             }
             catch (ValidationException ex)
             {
                 return BadRequest(new { error = ex.Code, message = ex.Message });
+            }
+            catch (UpdateException ex) when (ex.Code == "Forbidden" || ex.Code == "BackOfficeNotApproved")
+            {
+                return Problem(statusCode: StatusCodes.Status403Forbidden, title: ex.Code, detail: ex.Message);
             }
         }
 

@@ -1,3 +1,4 @@
+using System.Linq;
 using EvCharge.Api.Domain;
 using EvCharge.Api.Domain.DTOs;
 using EvCharge.Api.Infrastructure.Errors;
@@ -9,7 +10,7 @@ namespace EvCharge.Api.Services
 {
     public interface IStationService
     {
-        Task<StationResponse> CreateAsync(StationCreateRequest req, string actor, CancellationToken ct);
+        Task<StationResponse> CreateAsync(StationCreateRequest req, string actorNic, bool isBackOffice, CancellationToken ct);
         Task<StationResponse> GetByIdAsync(string id, CancellationToken ct);
         Task<StationResponse> UpdateAsync(string id, StationUpdateRequest req, string actor, CancellationToken ct);
         Task<StationResponse> ActivateAsync(string id, string actor, CancellationToken ct);
@@ -18,19 +19,40 @@ namespace EvCharge.Api.Services
         Task<List<StationListItem>> NearbyAsync(double lat, double lng, double radiusKm, string? type, CancellationToken ct);
         Task<StationScheduleResponse> GetScheduleAsync(string id, CancellationToken ct);
         Task<StationScheduleResponse> UpsertScheduleAsync(string id, StationScheduleUpsertRequest req, string actor, CancellationToken ct);
+
+        Task<(List<StationListItem> items, long total)> ListByBackOfficeAsync(string backOfficeNic, int page, int pageSize, CancellationToken ct);
     }
 
     public class StationService : IStationService
     {
         private readonly IStationRepository _repo;
         private readonly IScheduleService _schedule;
-        public StationService(IStationRepository repo, IScheduleService schedule) { _repo = repo; _schedule = schedule; }
+        private readonly IEvOwnerRepository _owners;
 
-        public async Task<StationResponse> CreateAsync(StationCreateRequest req, string actor, CancellationToken ct)
+        public StationService(IStationRepository repo, IScheduleService schedule, IEvOwnerRepository owners)
+        {
+            _repo = repo; _schedule = schedule; _owners = owners;
+        }
+
+        public async Task<StationResponse> CreateAsync(StationCreateRequest req, string actorNic, bool isBackOffice, CancellationToken ct)
         {
             ValidateCreate(req);
-            var entity = req.ToEntity(actor);
+
+            if (isBackOffice)
+            {
+                var bo = await _owners.GetByNicAsync(actorNic, ct) ?? throw new NotFoundException("BackOfficeNotFound", "BackOffice not found.");
+                if (!bo.Roles.Contains("BackOffice"))
+                    throw new UpdateException("Forbidden", "Only BackOffice can create stations.");
+                if (bo.BackOfficeProfile?.ApplicationStatus != "Approved")
+                    throw new ValidationException("BackOfficeNotApproved", "BackOffice application is not approved.");
+            }
+
+            var entity = req.ToEntity(actorNic);
             entity.CreatedAtUtc = DateTime.UtcNow;
+
+            if (isBackOffice)
+                entity.BackOfficeNic = actorNic;
+
             entity.Id = await _repo.CreateAsync(entity, ct);
             return entity.ToResponse();
         }
@@ -62,7 +84,6 @@ namespace EvCharge.Api.Services
         public async Task<StationResponse> DeactivateAsync(string id, string actor, CancellationToken ct)
         {
             var e = await _repo.GetByIdAsync(id, ct) ?? throw new NotFoundException("StationNotFound", "Station not found.");
-            // TODO: enforce "no future bookings" once bookings module exists
             e.Status = "Inactive"; e.UpdatedAtUtc = DateTime.UtcNow; e.UpdatedBy = actor;
             await _repo.ReplaceAsync(e, ct);
             return e.ToResponse();
@@ -70,7 +91,7 @@ namespace EvCharge.Api.Services
 
         public async Task<(List<StationListItem> items, long total)> ListAsync(string? type, string? status, int? minConnectors, int page, int pageSize, CancellationToken ct)
         {
-            var (items, total) = await _repo.ListAsync(type, status, minConnectors, page, pageSize, ct);
+            var (items, total) = await _repo.ListAsync(type, status, minConnectors, page, Math.Clamp(pageSize, 1, 100), ct);
             var result = new List<StationListItem>(items.Count);
             foreach (var s in items)
             {
@@ -127,8 +148,21 @@ namespace EvCharge.Api.Services
             };
 
             await _repo.UpsertScheduleAsync(schedule, ct);
-            // TODO: enqueue inventory regeneration
             return schedule.ToResponse();
+        }
+
+        public async Task<(List<StationListItem> items, long total)> ListByBackOfficeAsync(string backOfficeNic, int page, int pageSize, CancellationToken ct)
+        {
+            var (items, total) = await _repo.ListByBackOfficeAsync(backOfficeNic, Math.Max(1, page), Math.Clamp(pageSize, 1, 100), ct);
+            var result = new List<StationListItem>(items.Count);
+            foreach (var s in items)
+            {
+                var sch = await _repo.GetScheduleAsync(s.Id!, ct);
+                var summary = _schedule.ComputeSevenDaySlotSummary(s, sch)
+                    .Select(x => new AvailabilitySummaryItem { Date = x.date.ToString("yyyy-MM-dd"), AvailableSlots = x.slots }).ToList();
+                result.Add(s.ToListItem(summary));
+            }
+            return (result, total);
         }
 
         // -------- validations --------

@@ -1,5 +1,4 @@
 using EvCharge.Api.Domain;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace EvCharge.Api.Repositories
@@ -15,6 +14,9 @@ namespace EvCharge.Api.Repositories
         // schedules
         Task<StationSchedule?> GetScheduleAsync(string stationId, CancellationToken ct);
         Task UpsertScheduleAsync(StationSchedule schedule, CancellationToken ct);
+
+        // NEW: scoping by BackOffice (4-arg signature)
+        Task<(List<Station> items, long total)> ListByBackOfficeAsync(string backOfficeNic, int page, int pageSize, CancellationToken ct);
     }
 
     public class StationRepository : IStationRepository
@@ -33,16 +35,18 @@ namespace EvCharge.Api.Repositories
         {
             try
             {
-                // IMPORTANT: index on "Location" (capital L) to match the document field
+                // 2dsphere on Location
                 var geo = Builders<Station>.IndexKeys.Geo2DSphere("Location");
                 _stations.Indexes.CreateOne(new CreateIndexModel<Station>(geo, new CreateIndexOptions { Name = "ix_Location_2dsphere" }));
 
                 var st = Builders<Station>.IndexKeys.Ascending(x => x.Status);
                 var tp = Builders<Station>.IndexKeys.Ascending(x => x.Type);
+                var bo = Builders<Station>.IndexKeys.Ascending(x => x.BackOfficeNic);
                 _stations.Indexes.CreateMany(new[]
                 {
                     new CreateIndexModel<Station>(st, new CreateIndexOptions{ Name="ix_status" }),
-                    new CreateIndexModel<Station>(tp, new CreateIndexOptions{ Name="ix_type" })
+                    new CreateIndexModel<Station>(tp, new CreateIndexOptions{ Name="ix_type" }),
+                    new CreateIndexModel<Station>(bo, new CreateIndexOptions{ Name="ix_backOfficeNic" })
                 });
 
                 var scheduleUx = Builders<StationSchedule>.IndexKeys.Ascending(x => x.StationId);
@@ -84,8 +88,6 @@ namespace EvCharge.Api.Repositories
         public async Task<List<Station>> NearbyAsync(double lat, double lng, double radiusKm, string? type, CancellationToken ct)
         {
             var fb = Builders<Station>.Filter;
-
-            // NOTE: field must be "Location" (exact case) to match your documents.
             var geo = fb.NearSphere("Location", lng, lat, maxDistance: radiusKm * 1000);
 
             var filter = geo & fb.Eq(x => x.Status, "Active");
@@ -100,5 +102,17 @@ namespace EvCharge.Api.Repositories
 
         public async Task UpsertScheduleAsync(StationSchedule schedule, CancellationToken ct)
             => await _schedules.ReplaceOneAsync(x => x.StationId == schedule.StationId, schedule, new ReplaceOptions { IsUpsert = true }, ct);
+
+        // NEW
+        public async Task<(List<Station> items, long total)> ListByBackOfficeAsync(string backOfficeNic, int page, int pageSize, CancellationToken ct)
+        {
+            var fb = Builders<Station>.Filter;
+            var filter = fb.Eq(x => x.BackOfficeNic, backOfficeNic);
+
+            var find = _stations.Find(filter);
+            var total = await find.CountDocumentsAsync(ct);
+            var items = await find.Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync(ct);
+            return (items, total);
+        }
     }
 }

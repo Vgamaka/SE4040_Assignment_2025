@@ -101,6 +101,9 @@ builder.Services.Configure<BookingOptions>(builder.Configuration.GetSection("Boo
 builder.Services.AddSingleton<IBookingRepository, BookingRepository>();
 builder.Services.AddSingleton<IQrTokenService, QrTokenService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+// BackOffice module
+builder.Services.AddScoped<IBackOfficeService, BackOfficeService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // CORS
 var cors = builder.Configuration.GetSection("Cors").Get<CorsOptions>()!;
@@ -136,3 +139,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

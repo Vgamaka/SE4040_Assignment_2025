@@ -1,4 +1,4 @@
-namespace EvCharge.Api.Domain.DTOs
+﻿namespace EvCharge.Api.Domain.DTOs
 {
     public class AuthLoginResponse
     {
@@ -10,5 +10,9 @@ namespace EvCharge.Api.Domain.DTOs
         public string Nic { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public List<string> Roles { get; set; } = new();
+
+        // new (non-breaking additions for unified auth)
+        public string Email { get; set; } = string.Empty;
+        public List<string> OperatorStationIds { get; set; } = new();
     }
 }

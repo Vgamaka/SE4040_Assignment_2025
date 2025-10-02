@@ -30,7 +30,11 @@ namespace EvCharge.Api.Domain
         public string Type { get; set; } = "AC";                      // AC|DC
         public int Connectors { get; set; } = 1;                      // >=1
         public string Status { get; set; } = "Active";                // Active|Inactive|Maintenance
-        public bool AutoApproveEnabled { get; set; } = false;         // NEW
+        public bool AutoApproveEnabled { get; set; } = false;
+
+        // NEW: owner BackOffice for this station (filled when caller is BackOffice)
+        [BsonElement("backOfficeNic")]
+        public string? BackOfficeNic { get; set; }
 
         public GeoPoint Location { get; set; } = new GeoPoint         // 2dsphere [lng,lat]
         {
@@ -41,7 +45,6 @@ namespace EvCharge.Api.Domain
         public int DefaultSlotMinutes { get; set; } = 60;             // 30,45,60,90,120
         public Pricing Pricing { get; set; } = new Pricing();
 
-        // timezone string for schedule computations (IANA preferred; Windows works too)
         public string HoursTimezone { get; set; } = "Asia/Colombo";
 
         public DateTime CreatedAtUtc { get; set; }
