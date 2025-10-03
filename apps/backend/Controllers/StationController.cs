@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using EvCharge.Api.Infrastructure.Errors;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace EvCharge.Api.Controllers
 {
@@ -27,7 +28,14 @@ namespace EvCharge.Api.Controllers
         {
             try
             {
-                var actorNic = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? User.Identity?.Name ?? "system";
+var actorNic = (
+    User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+    ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+    ?? User.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value
+    ?? User.Identity?.Name
+    ?? "system"
+).Trim().ToUpperInvariant();
+
                 var isBackOffice = User.IsInRole("BackOffice");
                 var res = await _service.CreateAsync(req, actorNic, isBackOffice, ct);
                 return CreatedAtAction(nameof(GetById), new { id = res.Id }, res);

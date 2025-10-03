@@ -57,12 +57,11 @@ namespace EvCharge.Api.Services
 
             var now  = DateTime.UtcNow;
             var hash = BCrypt.Net.BCrypt.HashPassword(req.Password);
-            var nic  = $"BO-{Guid.NewGuid():N}".Substring(0, 12);
+            var nic  = "BO-" + Guid.NewGuid().ToString("N")[..9].ToUpperInvariant(); // e.g., BO-4DA2EC2A0
 
             var profile = new BackOfficeProfile
             {
                 BusinessName      = businessName!,
-                // Brn removed because BackOfficeApplyRequest doesn't define it
                 ContactEmail      = contactEmail!,
                 ContactPhone      = string.IsNullOrWhiteSpace(req.ContactPhone) ? null : req.ContactPhone.Trim(),
                 ApplicationStatus = "Pending",
@@ -71,17 +70,17 @@ namespace EvCharge.Api.Services
 
             var o = new Owner
             {
-                Nic              = nic,
-                FullName         = req.FullName.Trim(),
-                Email            = email,
-                EmailLower       = emailLower,
-                Phone            = string.IsNullOrWhiteSpace(req.Phone) ? null : req.Phone.Trim(),
-                PasswordHash     = hash,
-                Address          = null,
-                IsActive         = true, // active login; actions gated by Admin approval
-                Roles            = new List<string> { "BackOffice" },
+                Nic               = nic,
+                FullName          = req.FullName.Trim(),
+                Email             = email,
+                EmailLower        = emailLower,
+                Phone             = string.IsNullOrWhiteSpace(req.Phone) ? null : req.Phone.Trim(),
+                PasswordHash      = hash,
+                Address           = null,
+                IsActive          = true, // active login; actions gated by Admin approval
+                Roles             = new List<string> { "BackOffice" },
                 BackOfficeProfile = profile,
-                CreatedAtUtc     = now
+                CreatedAtUtc      = now
             };
 
             await _owners.CreateAsync(o, ct);
@@ -146,24 +145,37 @@ namespace EvCharge.Api.Services
             if (!PhoneValidator.IsValid(req.Phone))
                 throw new ValidationException("InvalidPhone", "Phone format is invalid.");
 
-            var email = req.Email.Trim();
+            var email      = req.Email.Trim();
             var emailLower = email.ToLowerInvariant();
 
             if (await _owners.ExistsByEmailLowerAsync(emailLower, ct))
                 throw new RegistrationException("DuplicateEmail", "An account with this email already exists.");
 
-            var stationIds = (req.StationIds ?? new List<string>()).Distinct().ToList();
+            var stationIds = (req.StationIds ?? new List<string>())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Select(s => s.Trim())
+                .Distinct()
+                .ToList();
+
             foreach (var sid in stationIds)
             {
-                var s = await _stations.GetByIdAsync(sid, ct) ?? throw new NotFoundException("StationNotFound", $"Station {sid} not found.");
-                if (!string.Equals(s.BackOfficeNic, backOfficeNic, StringComparison.Ordinal))
+                // First check: does this station belong to me?
+                var belongs = await _stations.BelongsToBackOfficeAsync(sid, backOfficeNic, ct);
+                if (!belongs)
+                {
+                    // Decide if it's "not found" vs "forbidden"
+                    var exists = await _stations.GetByIdAsync(sid, ct) is not null;
+                    if (!exists)
+                        throw new NotFoundException("StationNotFound", $"Station {sid} not found.");
                     throw new UpdateException("ForbiddenStationScope", $"Station {sid} does not belong to this BackOffice.");
+                }
             }
 
             var now  = DateTime.UtcNow;
             var hash = BCrypt.Net.BCrypt.HashPassword(req.Password);
-            var nic  = $"OP-{Guid.NewGuid():N}".Substring(0, 12);
+            var nic  = "OP-" + Guid.NewGuid().ToString("N")[..9].ToUpperInvariant();
 
+            var normalizedBackOfficeNic = (backOfficeNic ?? string.Empty).Trim().ToUpperInvariant();
             var o = new Owner
             {
                 Nic                = nic,
@@ -174,7 +186,7 @@ namespace EvCharge.Api.Services
                 PasswordHash       = hash,
                 IsActive           = true,
                 Roles              = new List<string> { "Operator" },
-                BackOfficeNic      = backOfficeNic,
+                BackOfficeNic      = normalizedBackOfficeNic,
                 OperatorStationIds = stationIds,
                 CreatedAtUtc       = now
             };
@@ -200,8 +212,8 @@ namespace EvCharge.Api.Services
             var op = await _owners.GetByNicAsync(operatorNic, ct) ?? throw new NotFoundException("OperatorNotFound", "Operator not found.");
             if (!op.Roles.Contains("Operator"))
                 throw new ValidationException("InvalidRole", "Target user is not an operator.");
-            if (!string.Equals(op.BackOfficeNic, backOfficeNic, StringComparison.Ordinal))
-                throw new UpdateException("Forbidden", "Operator does not belong to this BackOffice.");
+if (!string.Equals(op.BackOfficeNic?.Trim() ?? "", backOfficeNic.Trim(), StringComparison.OrdinalIgnoreCase))
+    throw new UpdateException("Forbidden", "Operator does not belong to this BackOffice.");
 
             var cleaned = (stationIds ?? new List<string>())
                 .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -211,9 +223,14 @@ namespace EvCharge.Api.Services
 
             foreach (var sid in cleaned)
             {
-                var s = await _stations.GetByIdAsync(sid, ct) ?? throw new NotFoundException("StationNotFound", $"Station {sid} not found.");
-                if (!string.Equals(s.BackOfficeNic, backOfficeNic, StringComparison.Ordinal))
+                var belongs = await _stations.BelongsToBackOfficeAsync(sid, backOfficeNic, ct);
+                if (!belongs)
+                {
+                    var exists = await _stations.GetByIdAsync(sid, ct) is not null;
+                    if (!exists)
+                        throw new NotFoundException("StationNotFound", $"Station {sid} not found.");
                     throw new UpdateException("ForbiddenStationScope", $"Station {sid} does not belong to this BackOffice.");
+                }
             }
 
             op.OperatorStationIds = cleaned;

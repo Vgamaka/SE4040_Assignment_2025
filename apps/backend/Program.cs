@@ -120,6 +120,13 @@ builder.Services.AddCors(o =>
 
 var app = builder.Build();
 
+app.MapGet("/__diag", (IConfiguration cfg, IWebHostEnvironment env) =>
+{
+    var mongo = cfg.GetSection("Mongo").Get<EvCharge.Api.Options.MongoOptions>();
+    return Results.Ok(new { env = env.EnvironmentName, db = mongo?.Database, hasConn = !string.IsNullOrWhiteSpace(mongo?.ConnectionString) });
+});
+
+
 // Swagger in Dev
 if (app.Environment.IsDevelopment())
 {

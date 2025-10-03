@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using EvCharge.Api.Infrastructure.Errors;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims; 
 
 namespace EvCharge.Api.Controllers
 {
@@ -42,7 +43,14 @@ namespace EvCharge.Api.Controllers
         [ProducesResponseType(typeof(OwnerResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> Me(CancellationToken ct)
         {
-            var nic = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "";
+
+
+var nic = (
+    User.FindFirst(ClaimTypes.NameIdentifier)?.Value               // maps from 'sub'
+    ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value          // raw 'sub' if mapping is cleared later
+    ?? User.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value   // we also set unique_name = NIC
+    ?? ""
+).Trim().ToUpperInvariant();
             var res = await _bo.GetMyProfileAsync(nic, ct);
             return Ok(res);
         }
@@ -57,8 +65,12 @@ namespace EvCharge.Api.Controllers
         {
             try
             {
-                var nic = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "";
-                var res = await _bo.CreateOperatorAsync(req, nic, ct);
+var nic = (
+    User.FindFirst(ClaimTypes.NameIdentifier)?.Value               // maps from 'sub'
+    ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value          // raw 'sub' if mapping is cleared later
+    ?? User.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value   // we also set unique_name = NIC
+    ?? ""
+).Trim().ToUpperInvariant();                var res = await _bo.CreateOperatorAsync(req, nic, ct);
                 return Created("", res);
             }
             catch (RegistrationException ex) { return Conflict(new { error = ex.Code, message = ex.Message }); }
@@ -75,8 +87,12 @@ namespace EvCharge.Api.Controllers
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         public async Task<IActionResult> ListOperators([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
         {
-            var nic = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "";
-            var (items, total) = await _bo.ListOperatorsAsync(nic, Math.Max(1, page), Math.Clamp(pageSize, 1, 100), ct);
+var nic = (
+    User.FindFirst(ClaimTypes.NameIdentifier)?.Value               // maps from 'sub'
+    ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value          // raw 'sub' if mapping is cleared later
+    ?? User.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value   // we also set unique_name = NIC
+    ?? ""
+).Trim().ToUpperInvariant();            var (items, total) = await _bo.ListOperatorsAsync(nic, Math.Max(1, page), Math.Clamp(pageSize, 1, 100), ct);
             return Ok(new { total, items });
         }
 
@@ -90,7 +106,12 @@ namespace EvCharge.Api.Controllers
         {
             try
             {
-                var nic = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "";
+var nic = (
+    User.FindFirst(ClaimTypes.NameIdentifier)?.Value               // maps from 'sub'
+    ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value          // raw 'sub' if mapping is cleared later
+    ?? User.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value   // we also set unique_name = NIC
+    ?? ""
+).Trim().ToUpperInvariant();
                 var res = await _bo.AttachStationsToOperatorAsync(operatorNic, req.StationIds, nic, ct);
                 return Ok(res);
             }
@@ -100,6 +121,15 @@ namespace EvCharge.Api.Controllers
             { return Problem(statusCode: StatusCodes.Status403Forbidden, title: ex.Code, detail: ex.Message); }
             catch (ValidationException ex) { return BadRequest(new { error = ex.Code, message = ex.Message }); }
         }
+// Controllers/BackOfficeController.cs (temporary)
+[Authorize(Roles = "BackOffice")]
+[HttpGet("debug/whoami")]
+public IActionResult WhoAmI()
+{
+    var sub = (User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value ?? "").Trim();
+    var roles = User.Claims.Where(c => c.Type.EndsWith("/claims/role")).Select(c => c.Value).ToList();
+    return Ok(new { sub, roles });
+}
 
         /// <summary>BackOffice: list my stations.</summary>
         [Authorize(Roles = "BackOffice")]
@@ -107,7 +137,12 @@ namespace EvCharge.Api.Controllers
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         public async Task<IActionResult> MyStations([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
         {
-            var nic = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "";
+var nic = (
+    User.FindFirst(ClaimTypes.NameIdentifier)?.Value               // maps from 'sub'
+    ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value          // raw 'sub' if mapping is cleared later
+    ?? User.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value   // we also set unique_name = NIC
+    ?? ""
+).Trim().ToUpperInvariant();
             var (items, total) = await _stations.ListByBackOfficeAsync(nic, Math.Max(1, page), Math.Clamp(pageSize, 1, 100), ct);
             return Ok(new { total, items });
         }

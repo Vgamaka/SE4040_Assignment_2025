@@ -111,31 +111,31 @@ namespace EvCharge.Api.Services
         }
 
         // Build common claims for JWT
-        private static List<Claim> BuildClaims(EvCharge.Api.Domain.Owner account)
-        {
-            var claims = new List<Claim>
-            {
-                // Keep NIC as subject to remain compatible with downstream code (e.g., BookingController uses sub as NIC)
-                new Claim(JwtRegisteredClaimNames.Sub, account.Nic),
-                new Claim(JwtRegisteredClaimNames.UniqueName, account.Nic),
-                new Claim(ClaimTypes.Name, account.FullName ?? string.Empty)
-            };
+private static List<Claim> BuildClaims(EvCharge.Api.Domain.Owner account)
+{
+    var nic = (account.Nic ?? string.Empty).Trim().ToUpperInvariant();
 
-            if (account.Roles is not null)
-            {
-                foreach (var r in account.Roles)
-                    if (!string.IsNullOrWhiteSpace(r))
-                        claims.Add(new Claim(ClaimTypes.Role, r));
-            }
+    var claims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, nic),
+        new Claim(JwtRegisteredClaimNames.UniqueName, nic),
+        new Claim(ClaimTypes.NameIdentifier, nic),   // <-- add this line
+        new Claim(ClaimTypes.Name, account.FullName ?? string.Empty)
+    };
 
-            if (account.OperatorStationIds is not null)
-            {
-                foreach (var sid in account.OperatorStationIds)
-                    if (!string.IsNullOrWhiteSpace(sid))
-                        claims.Add(new Claim("OperatorStationId", sid)); // custom multi-valued claim
-            }
+    if (account.Roles is not null)
+        foreach (var r in account.Roles)
+            if (!string.IsNullOrWhiteSpace(r))
+                claims.Add(new Claim(ClaimTypes.Role, r));
 
-            return claims;
-        }
+    if (account.OperatorStationIds is not null)
+        foreach (var sid in account.OperatorStationIds)
+            if (!string.IsNullOrWhiteSpace(sid))
+                claims.Add(new Claim("OperatorStationId", sid));
+
+    return claims;
+}
+
+
     }
 }

@@ -35,6 +35,7 @@ namespace EvCharge.Api.Domain
     public class StationSchedule
     {
         [BsonId, BsonRepresentation(BsonType.ObjectId)]
+        [BsonIgnoreIfDefault]              
         public string? Id { get; set; }
 
         [BsonRepresentation(BsonType.ObjectId)]
@@ -44,5 +45,6 @@ namespace EvCharge.Api.Domain
         public List<ScheduleException> Exceptions { get; set; } = new();
         public List<CapacityOverride> CapacityOverrides { get; set; } = new();
         public DateTime UpdatedAtUtc { get; set; }
+
     }
 }

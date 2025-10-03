@@ -5,6 +5,7 @@ using EvCharge.Api.Infrastructure.Errors;
 using EvCharge.Api.Infrastructure.Mapping;
 using EvCharge.Api.Infrastructure.Validation;
 using EvCharge.Api.Repositories;
+using MongoDB.Bson;
 
 namespace EvCharge.Api.Services
 {
@@ -124,32 +125,39 @@ namespace EvCharge.Api.Services
             return schedule.ToResponse();
         }
 
-        public async Task<StationScheduleResponse> UpsertScheduleAsync(string id, StationScheduleUpsertRequest req, string actor, CancellationToken ct)
+
+public async Task<StationScheduleResponse> UpsertScheduleAsync(string id, StationScheduleUpsertRequest req, string actor, CancellationToken ct)
+{
+    var e = await _repo.GetByIdAsync(id, ct) ?? throw new NotFoundException("StationNotFound", "Station not found.");
+    ValidateScheduleUpsert(req);
+
+    // Check if a schedule already exists
+    var existing = await _repo.GetScheduleAsync(e.Id!, ct);
+
+    var schedule = new StationSchedule
+    {
+        StationId = e.Id!,
+        Weekly = new WeeklySchedule
         {
-            var e = await _repo.GetByIdAsync(id, ct) ?? throw new NotFoundException("StationNotFound", "Station not found.");
-            ValidateScheduleUpsert(req);
+            Mon = req.Weekly.Mon.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
+            Tue = req.Weekly.Tue.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
+            Wed = req.Weekly.Wed.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
+            Thu = req.Weekly.Thu.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
+            Fri = req.Weekly.Fri.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
+            Sat = req.Weekly.Sat.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
+            Sun = req.Weekly.Sun.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
+        },
+        Exceptions = req.Exceptions.Select(x => new ScheduleException { Date = x.Date, Closed = x.Closed }).ToList(),
+        CapacityOverrides = req.CapacityOverrides.Select(x => new CapacityOverride { Date = x.Date, Connectors = x.Connectors }).ToList(),
+        UpdatedAtUtc = DateTime.UtcNow
+    };
 
-            var schedule = new StationSchedule
-            {
-                StationId = e.Id!,
-                Weekly = new WeeklySchedule
-                {
-                    Mon = req.Weekly.Mon.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
-                    Tue = req.Weekly.Tue.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
-                    Wed = req.Weekly.Wed.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
-                    Thu = req.Weekly.Thu.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
-                    Fri = req.Weekly.Fri.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
-                    Sat = req.Weekly.Sat.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
-                    Sun = req.Weekly.Sun.Select(x => new DayTimeRange { Start = x.Start, End = x.End }).ToList(),
-                },
-                Exceptions = req.Exceptions.Select(x => new ScheduleException { Date = x.Date, Closed = x.Closed }).ToList(),
-                CapacityOverrides = req.CapacityOverrides.Select(x => new CapacityOverride { Date = x.Date, Connectors = x.Connectors }).ToList(),
-                UpdatedAtUtc = DateTime.UtcNow
-            };
+    // Reuse Id if present, otherwise generate a new one
+    schedule.Id = existing?.Id ?? ObjectId.GenerateNewId().ToString();
 
-            await _repo.UpsertScheduleAsync(schedule, ct);
-            return schedule.ToResponse();
-        }
+    await _repo.UpsertScheduleAsync(schedule, ct);
+    return schedule.ToResponse();
+}
 
         public async Task<(List<StationListItem> items, long total)> ListByBackOfficeAsync(string backOfficeNic, int page, int pageSize, CancellationToken ct)
         {
