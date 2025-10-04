@@ -114,6 +114,10 @@ var actorNic = (
             {
                 return NotFound(new { error = ex.Code, message = ex.Message });
             }
+            catch (UpdateException ex) when (ex.Code.StartsWith("PolicyViolation"))
+            {
+                return Problem(statusCode: StatusCodes.Status409Conflict, title: ex.Code, detail: ex.Message);
+            }
         }
 
         /// <summary>Activate station (BackOffice/Admin).</summary>

@@ -38,6 +38,13 @@ namespace EvCharge.Api.Repositories
                 {
                     new CreateIndexModel<Booking>(Builders<Booking>.IndexKeys.Ascending(x => x.OwnerNic).Descending(x => x.SlotStartUtc), new CreateIndexOptions { Name="ix_owner_time" }),
                     new CreateIndexModel<Booking>(Builders<Booking>.IndexKeys.Ascending(x => x.StationId).Ascending(x => x.SlotStartUtc).Ascending(x => x.Status), new CreateIndexOptions { Name="ix_station_time_status" }),
+                    new CreateIndexModel<Booking>(
+                    Builders<Booking>.IndexKeys.Ascending(x => x.Status).Ascending(x => x.SlotStartUtc),
+                    new CreateIndexOptions { Name = "ix_status_slotStart" }),
+                    new CreateIndexModel<Booking>(
+                    Builders<Booking>.IndexKeys.Ascending(x => x.CreatedAtUtc),
+                    new CreateIndexOptions { Name = "ix_createdAt" }),
+
                     new CreateIndexModel<Booking>(Builders<Booking>.IndexKeys.Ascending(x => x.BookingCode), new CreateIndexOptions { Name="ix_code" })
                 }, cancellationToken: ct);
 

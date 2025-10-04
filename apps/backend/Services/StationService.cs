@@ -29,10 +29,14 @@ namespace EvCharge.Api.Services
         private readonly IStationRepository _repo;
         private readonly IScheduleService _schedule;
         private readonly IEvOwnerRepository _owners;
+        private readonly IPolicyService _policy;
 
-        public StationService(IStationRepository repo, IScheduleService schedule, IEvOwnerRepository owners)
+        public StationService(IStationRepository repo, IScheduleService schedule, IEvOwnerRepository owners, IPolicyService policy)
         {
-            _repo = repo; _schedule = schedule; _owners = owners;
+            _repo = repo;
+            _schedule = schedule;
+            _owners = owners;
+            _policy = policy;
         }
 
         public async Task<StationResponse> CreateAsync(StationCreateRequest req, string actorNic, bool isBackOffice, CancellationToken ct)
@@ -85,6 +89,10 @@ namespace EvCharge.Api.Services
         public async Task<StationResponse> DeactivateAsync(string id, string actor, CancellationToken ct)
         {
             var e = await _repo.GetByIdAsync(id, ct) ?? throw new NotFoundException("StationNotFound", "Station not found.");
+
+            // --- NEW: policy deactivation guard ---
+            await _policy.EnsureStationCanDeactivateAsync(e.Id!, ct);
+
             e.Status = "Inactive"; e.UpdatedAtUtc = DateTime.UtcNow; e.UpdatedBy = actor;
             await _repo.ReplaceAsync(e, ct);
             return e.ToResponse();

@@ -18,7 +18,7 @@ namespace EvCharge.Api.Domain
         public string SlotStartLocal { get; set; } = ""; // yyyy-MM-ddTHH:mm (station local)
         public int SlotMinutes { get; set; }
 
-        public string Status { get; set; } = "Pending"; // Pending|Approved|Rejected|Cancelled|Expired|Completed
+        public string Status { get; set; } = "Pending"; // Pending|Approved|Rejected|Cancelled|NoShow|Aborted|Expired|CheckedIn|Completed
         public string? Notes { get; set; }
 
         public string? QrTokenHash { get; set; }
