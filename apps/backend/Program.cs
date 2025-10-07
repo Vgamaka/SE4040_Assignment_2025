@@ -129,6 +129,8 @@ builder.Services.AddSingleton<IPolicyService, PolicyService>();
 builder.Services.AddScoped<IReportsService, ReportsService>();
 // Auto mark “Approved” bookings as NoShow after latest check-in window
 builder.Services.AddHostedService<NoShowSweeper>();
+builder.Services.AddSingleton<IStationRepository, StationRepository>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 
 // CORS

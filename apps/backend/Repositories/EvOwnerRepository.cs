@@ -15,8 +15,7 @@ namespace EvCharge.Api.Repositories
         Task<Owner?> GetByNicAsync(string nic, CancellationToken ct);
         Task<Owner?> GetByEmailLowerAsync(string emailLower, CancellationToken ct);
         Task<bool> ReplaceAsync(Owner owner, CancellationToken ct);
-
-        // NEW
+        Task<(List<Owner> items, long total)> ListAllAsync(string? role, string? q, int page, int pageSize, CancellationToken ct);
         Task<(List<Owner> items, long total)> ListOperatorsByBackOfficeAsync(string backOfficeNic, int page, int pageSize, CancellationToken ct);
         Task<(List<Owner> items, long total)> ListBackOfficesByStatusAsync(string? status, int page, int pageSize, CancellationToken ct);
     }
@@ -173,5 +172,34 @@ private readonly ILogger<EvOwnerRepository> _log;
             var items = await find.Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync(ct);
             return (items, total);
         }
+        public async Task<(List<Owner> items, long total)> ListAllAsync(
+    string? role, string? q, int page, int pageSize, CancellationToken ct)
+{
+    var fb = Builders<Owner>.Filter;
+    var filter = fb.Empty;
+
+    if (!string.IsNullOrWhiteSpace(role))
+        filter &= fb.AnyEq(o => o.Roles, role.Trim());
+
+    if (!string.IsNullOrWhiteSpace(q))
+    {
+        var needle = Regex.Escape(q.Trim());
+        var rx = new BsonRegularExpression(needle, "i");
+        filter &= fb.Or(
+            fb.Regex("nic", rx),
+            fb.Regex("fullName", rx),
+            fb.Regex("email", rx)
+        );
+    }
+
+    var find = _col.Find(filter, new FindOptions { Collation = CaseInsensitive })
+                   .Sort(Builders<Owner>.Sort.Descending(o => o.CreatedAtUtc));
+
+    var total = await _col.CountDocumentsAsync(filter, new CountOptions { Collation = CaseInsensitive }, ct);
+    var items = await find.Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync(ct);
+    return (items, total);
+}
+
+
     }
 }

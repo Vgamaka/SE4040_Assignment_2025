@@ -4,25 +4,33 @@ using EvCharge.Api.Domain.DTOs;
 using EvCharge.Api.Infrastructure.Errors;
 using EvCharge.Api.Infrastructure.Validation;
 using EvCharge.Api.Repositories;
+using EvCharge.Api.Infrastructure.Mapping;
 
 namespace EvCharge.Api.Services
 {
-    public interface IAdminService
-    {
-        Task<OwnerResponse> CreateAdminAsync(AdminCreateRequest req, string actorNic, CancellationToken ct);
-        Task<(List<OwnerResponse> items, long total)> ListBackOfficeApplicationsAsync(string? status, int page, int pageSize, CancellationToken ct);
-        Task<OwnerResponse> ApproveBackOfficeAsync(string backOfficeNic, string reviewerNic, string? notes, CancellationToken ct);
-        Task<OwnerResponse> RejectBackOfficeAsync(string backOfficeNic, string reviewerNic, string notes, CancellationToken ct);
-    }
+public interface IAdminService
+{
+    Task<OwnerResponse> CreateAdminAsync(AdminCreateRequest req, string actorNic, CancellationToken ct);
+    Task<(List<AdminBackOfficeListItem> items, long total)> ListBackOfficeApplicationsAsync(string? status, int page, int pageSize, CancellationToken ct);
+
+    Task<(List<AdminFullOwnerDto> items, long total)> ListAllOwnersAsync(string? role, string? q, bool includeSensitive, CancellationToken ct);
+    Task<(List<AdminFullStationDto> items, long total)> ListAllStationsAsync(string? type, string? status, int? minConnectors, string? backOfficeNic, string? q, int page, int pageSize, CancellationToken ct);
+
+    Task<OwnerResponse> ApproveBackOfficeAsync(string backOfficeNic, string reviewerNic, string? notes, CancellationToken ct);
+    Task<OwnerResponse> RejectBackOfficeAsync(string backOfficeNic, string reviewerNic, string notes, CancellationToken ct);
+}
+
 
     public class AdminService : IAdminService
     {
         private readonly IEvOwnerRepository _owners;
+    private readonly IStationRepository _stations; 
 
-        public AdminService(IEvOwnerRepository owners)
-        {
-            _owners = owners;
-        }
+    public AdminService(IEvOwnerRepository owners, IStationRepository stations)
+    {
+        _owners = owners;
+        _stations = stations;
+    }
 
         public async Task<OwnerResponse> CreateAdminAsync(AdminCreateRequest req, string actorNic, CancellationToken ct)
         {
@@ -76,24 +84,16 @@ namespace EvCharge.Api.Services
             };
         }
 
-        public async Task<(List<OwnerResponse> items, long total)> ListBackOfficeApplicationsAsync(string? status, int page, int pageSize, CancellationToken ct)
-        {
-            var (items, total) = await _owners.ListBackOfficesByStatusAsync(status, Math.Max(1, page), Math.Clamp(pageSize, 1, 100), ct);
-            var list = items.Select(o => new OwnerResponse
-            {
-                Nic = o.Nic,
-                FullName = o.FullName,
-                Email = o.Email,
-                Phone = o.Phone,
-                Address = o.Address,
-                IsActive = o.IsActive,
-                Roles = o.Roles,
-                CreatedAtUtc = o.CreatedAtUtc,
-                UpdatedAtUtc = o.UpdatedAtUtc
-            }).ToList();
+public async Task<(List<AdminBackOfficeListItem> items, long total)> ListBackOfficeApplicationsAsync(
+    string? status, int page, int pageSize, CancellationToken ct)
+{
+    var (items, total) = await _owners.ListBackOfficesByStatusAsync(
+        status, Math.Max(1, page), Math.Clamp(pageSize, 1, 100), ct);
 
-            return (list, total);
-        }
+    var list = items.Select(o => o.ToAdminBackOfficeListItem()).ToList();
+    return (list, total);
+}
+
 
         public async Task<OwnerResponse> ApproveBackOfficeAsync(string backOfficeNic, string reviewerNic, string? notes, CancellationToken ct)
         {
@@ -156,5 +156,21 @@ namespace EvCharge.Api.Services
                 UpdatedAtUtc = o.UpdatedAtUtc
             };
         }
+        public async Task<(List<AdminFullOwnerDto> items, long total)> ListAllOwnersAsync(
+    string? role, string? q, bool includeSensitive, CancellationToken ct)
+{
+    var (entities, total) = await _owners.ListAllAsync(role, q, page: 1, pageSize: int.MaxValue, ct); // paging done at controller
+    var items = entities.Select(o => o.ToAdminFullOwnerDto(includeSensitive)).ToList();
+    return (items, total);
+}
+
+public async Task<(List<AdminFullStationDto> items, long total)> ListAllStationsAsync(
+    string? type, string? status, int? minConnectors, string? backOfficeNic, string? q, int page, int pageSize, CancellationToken ct)
+{
+    var (stations, total) = await _stations.AdminListAsync(type, status, minConnectors, backOfficeNic, q, page, pageSize, ct);
+    var items = stations.Select(s => s.ToAdminFullStationDto()).ToList();
+    return (items, total);
+}
+
     }
 }
