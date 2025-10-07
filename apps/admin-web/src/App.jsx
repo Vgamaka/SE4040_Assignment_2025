@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import OperatorDashboard from "./pages/OperatorDashboard.jsx";
+import BackOfficeDashboard from "./pages/BackOfficeDashboard.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 export default function App() {
   return (
@@ -8,7 +11,34 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* Protected role-based dashboards */}
+        <Route
+          path="/dashboard/admin"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/operator"
+          element={
+            <ProtectedRoute allowedRoles={["Operator"]}>
+              <OperatorDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/backoffice"
+          element={
+            <ProtectedRoute allowedRoles={["BackOffice"]}>
+              <BackOfficeDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );

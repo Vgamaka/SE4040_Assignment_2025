@@ -24,7 +24,20 @@ export default function Login() {
       localStorage.setItem("token", res.data.accessToken);
       localStorage.setItem("user", JSON.stringify(res.data));
 
-      navigate("/dashboard");
+      // ✅ Get user role from response
+      const role = res.data.roles?.[0]; // e.g. "Admin", "Operator", "BackOffice"
+
+      // ✅ Redirect based on role
+      if (role === "Admin") {
+        navigate("/dashboard/admin");
+      } else if (role === "Operator") {
+        navigate("/dashboard/operator");
+      } else if (role === "BackOffice") {
+        navigate("/dashboard/backoffice");
+      } else {
+        navigate("/dashboard"); // fallback
+      }
+
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || "Login failed");
