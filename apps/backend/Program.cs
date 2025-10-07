@@ -131,6 +131,7 @@ builder.Services.AddScoped<IReportsService, ReportsService>();
 builder.Services.AddHostedService<NoShowSweeper>();
 builder.Services.AddSingleton<IStationRepository, StationRepository>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
 // CORS

@@ -8,6 +8,10 @@ namespace EvCharge.Api.Services
     {
         Task EnqueueAsync(string type, string toNic, string subject, string message,
                           IDictionary<string, object?>? payload, CancellationToken ct);
+
+        Task<(List<Notification> items, long total)> ListMineAsync(string nic, bool? unreadOnly, int page, int pageSize, CancellationToken ct);
+        Task<bool> MarkReadAsync(string id, string nic, CancellationToken ct);
+        Task<long> MarkAllReadAsync(string nic, CancellationToken ct);
     }
 
     public class NotificationService : INotificationService
@@ -26,10 +30,23 @@ namespace EvCharge.Api.Services
             {
                 _col.Indexes.CreateMany(new[]
                 {
-                    new CreateIndexModel<Notification>(Builders<Notification>.IndexKeys
-                        .Ascending(x => x.ToNic).Descending(x => x.CreatedAtUtc), new CreateIndexOptions{ Name="ix_to_created" }),
-                    new CreateIndexModel<Notification>(Builders<Notification>.IndexKeys
-                        .Descending(x => x.CreatedAtUtc), new CreateIndexOptions{ Name="ix_created_desc" })
+                    new CreateIndexModel<Notification>(
+                        Builders<Notification>.IndexKeys
+                            .Ascending(x => x.ToNic)
+                            .Descending(x => x.CreatedAtUtc),
+                        new CreateIndexOptions { Name = "ix_to_created" }),
+
+                    new CreateIndexModel<Notification>(
+                        Builders<Notification>.IndexKeys
+                            .Descending(x => x.CreatedAtUtc),
+                        new CreateIndexOptions { Name = "ix_created_desc" }),
+
+                    //  fast unread queries per user
+                    new CreateIndexModel<Notification>(
+                        Builders<Notification>.IndexKeys
+                            .Ascending(x => x.ToNic)
+                            .Ascending(x => x.ReadAtUtc),
+                        new CreateIndexOptions { Name = "ix_to_read" })
                 });
             }
             catch { /* idempotent */ }
@@ -50,13 +67,56 @@ namespace EvCharge.Api.Services
             await _col.InsertOneAsync(n, cancellationToken: ct);
         }
 
+        public async Task<(List<Notification> items, long total)> ListMineAsync(
+            string nic, bool? unreadOnly, int page, int pageSize, CancellationToken ct)
+        {
+            var fb = Builders<Notification>.Filter;
+            var filter = fb.Eq(x => x.ToNic, nic);
+            if (unreadOnly == true)
+                filter = fb.And(filter, fb.Eq(x => x.ReadAtUtc, (DateTime?)null));
+
+            var find = _col.Find(filter).SortByDescending(x => x.CreatedAtUtc);
+            var total = await _col.CountDocumentsAsync(filter, cancellationToken: ct);
+            var items = await find.Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync(ct);
+            return (items, total);
+        }
+
+        public async Task<bool> MarkReadAsync(string id, string nic, CancellationToken ct)
+        {
+            var fb = Builders<Notification>.Filter;
+            var filter = fb.And(
+                fb.Eq(x => x.Id, id),
+                fb.Eq(x => x.ToNic, nic),
+                fb.Eq(x => x.ReadAtUtc, (DateTime?)null)
+            );
+
+            var update = Builders<Notification>.Update
+                .Set(x => x.ReadAtUtc, DateTime.UtcNow);
+
+            var res = await _col.UpdateOneAsync(filter, update, cancellationToken: ct);
+            return res.ModifiedCount > 0;
+        }
+
+        public async Task<long> MarkAllReadAsync(string nic, CancellationToken ct)
+        {
+            var fb = Builders<Notification>.Filter;
+            var filter = fb.And(
+                fb.Eq(x => x.ToNic, nic),
+                fb.Eq(x => x.ReadAtUtc, (DateTime?)null)
+            );
+
+            var update = Builders<Notification>.Update
+                .Set(x => x.ReadAtUtc, DateTime.UtcNow);
+
+            var res = await _col.UpdateManyAsync(filter, update, cancellationToken: ct);
+            return res.ModifiedCount;
+        }
+
         private static BsonDocument ToBson(IDictionary<string, object?> payload)
         {
             var doc = new BsonDocument();
             foreach (var kv in payload)
-            {
                 doc[kv.Key] = kv.Value is null ? BsonNull.Value : BsonValue.Create(kv.Value);
-            }
             return doc;
         }
     }
