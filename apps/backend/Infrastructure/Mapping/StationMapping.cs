@@ -123,5 +123,36 @@ namespace EvCharge.Api.Infrastructure.Mapping
                 UpdatedAtUtc = s.UpdatedAtUtc
             };
         }
+                public static AdminFullStationDto ToAdminFullStationDto(this Station s)
+        {
+            return new AdminFullStationDto
+            {
+                Id = s.Id!,
+                Name = s.Name,
+                Type = s.Type,
+                Connectors = s.Connectors,
+                Status = s.Status,
+                AutoApproveEnabled = s.AutoApproveEnabled,
+                BackOfficeNic = s.BackOfficeNic,
+                Location = new GeoPointDto
+                {
+                    Type = s.Location?.Type ?? "Point",
+                    Coordinates = s.Location?.Coordinates ?? Array.Empty<double>()
+                },
+                DefaultSlotMinutes = s.DefaultSlotMinutes,
+                Pricing = new PricingAdminDto
+                {
+                    Model = s.Pricing.Model,
+                    Base = s.Pricing.Base,
+                    PerHour = s.Pricing.PerHour,
+                    PerKwh = s.Pricing.PerKwh,
+                    TaxPct = s.Pricing.TaxPct
+                },
+                HoursTimezone = s.HoursTimezone,
+                CreatedAtUtc = s.CreatedAtUtc,
+                UpdatedAtUtc = s.UpdatedAtUtc,
+                UpdatedBy = s.UpdatedBy
+            };
+        }
     }
 }

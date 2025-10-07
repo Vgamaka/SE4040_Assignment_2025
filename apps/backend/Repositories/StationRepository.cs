@@ -12,6 +12,7 @@ namespace EvCharge.Api.Repositories
         Task<bool> ReplaceAsync(Station s, CancellationToken ct);
         Task<(List<Station> items, long total)> ListAsync(string? type, string? status, int? minConnectors, int page, int pageSize, CancellationToken ct);
         Task<List<Station>> NearbyAsync(double lat, double lng, double radiusKm, string? type, CancellationToken ct);
+        Task<(List<Station> items, long total)> AdminListAsync(string? type, string? status, int? minConnectors, string? backOfficeNic, string? q, int page, int pageSize, CancellationToken ct);
 
         // schedules
         Task<StationSchedule?> GetScheduleAsync(string stationId, CancellationToken ct);
@@ -145,5 +146,40 @@ namespace EvCharge.Api.Repositories
             var find = _stations.Find(filter, new FindOptions { Collation = CaseInsensitive });
             return await find.AnyAsync(ct);
         }
+
+        public async Task<(List<Station> items, long total)> AdminListAsync(
+    string? type, string? status, int? minConnectors, string? backOfficeNic, string? q,
+    int page, int pageSize, CancellationToken ct)
+{
+    var fb = Builders<Station>.Filter;
+    var filter = fb.Empty;
+
+    if (!string.IsNullOrWhiteSpace(type)) filter &= fb.Eq(x => x.Type, type.Trim());
+    if (!string.IsNullOrWhiteSpace(status)) filter &= fb.Eq(x => x.Status, status.Trim());
+    if (minConnectors.HasValue) filter &= fb.Gte(x => x.Connectors, minConnectors.Value);
+
+    if (!string.IsNullOrWhiteSpace(backOfficeNic))
+    {
+        var nic = backOfficeNic.Trim();
+        var rx = new BsonRegularExpression("^\\s*" + Regex.Escape(nic) + "\\s*$", "i");
+        filter &= fb.Or(fb.Eq(s => s.BackOfficeNic, nic), fb.Regex("backOfficeNic", rx));
+    }
+
+    if (!string.IsNullOrWhiteSpace(q))
+    {
+        var needle = Regex.Escape(q.Trim());
+        var rx = new BsonRegularExpression(needle, "i");
+        filter &= fb.Regex("name", rx);
+    }
+
+    var find = _stations.Find(filter, new FindOptions { Collation = CaseInsensitive })
+                        .Sort(Builders<Station>.Sort.Descending(s => s.CreatedAtUtc));
+
+    var total = await _stations.CountDocumentsAsync(filter, new CountOptions { Collation = CaseInsensitive }, ct);
+    var items = await find.Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync(ct);
+    return (items, total);
+}
+
+        
     }
 }
