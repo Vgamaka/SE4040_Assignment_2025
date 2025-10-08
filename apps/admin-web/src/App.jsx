@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
-import OperatorDashboard from "./pages/OperatorDashboard.jsx";
+import StationDashboard from "./pages/StationDashboard.jsx";
 import BackOfficeDashboard from "./pages/BackOfficeDashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
@@ -26,7 +26,7 @@ export default function App() {
           path="/dashboard/operator"
           element={
             <ProtectedRoute allowedRoles={["Operator"]}>
-              <OperatorDashboard />
+              <StationDashboard />
             </ProtectedRoute>
           }
         />

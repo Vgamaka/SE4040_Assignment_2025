@@ -23,6 +23,7 @@ export default function Login() {
       // ✅ Save token and user info
       localStorage.setItem("token", res.data.accessToken);
       localStorage.setItem("user", JSON.stringify(res.data));
+      // localStorage.setItem("user", JSON.stringify(data));
 
       // ✅ Get user role from response
       const role = res.data.roles?.[0]; // e.g. "Admin", "Operator", "BackOffice"

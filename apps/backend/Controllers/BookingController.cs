@@ -86,7 +86,7 @@ namespace EvCharge.Api.Controllers
             { return NotFound(new { error = ex.Code, message = ex.Message }); }
         }
 
-[Authorize(Roles = "Owner")]
+[Authorize(Roles = "Owner,Operator")]
 [HttpPost("{id}/cancel")]
 [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
 [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -120,7 +120,7 @@ public async Task<IActionResult> Cancel([FromRoute] string id, CancellationToken
             return Ok(list);
         }
 
-        [Authorize(Roles = "BackOffice,Admin")]
+        [Authorize(Roles = "BackOffice,Admin,Operator")]
         [HttpPut("{id}/approve")]
         [ProducesResponseType(typeof(BookingApprovalResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -138,7 +138,7 @@ public async Task<IActionResult> Cancel([FromRoute] string id, CancellationToken
             { return NotFound(new { error = ex.Code, message = ex.Message }); }
         }
 
-        [Authorize(Roles = "BackOffice,Admin")]
+        [Authorize(Roles = "BackOffice,Admin,Operator")]
         [HttpPut("{id}/reject")]
         [ProducesResponseType(typeof(BookingResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
