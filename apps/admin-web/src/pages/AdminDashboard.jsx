@@ -37,7 +37,8 @@ const [ownerFormData, setOwnerFormData] = useState({
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loadingBackOffices, setLoadingBackOffices] = useState(false);
-
+  const backOfficePageSize = 5;
+  
   // Note modal state
   const [noteModal, setNoteModal] = useState({
     show: false,
@@ -52,7 +53,7 @@ const [ownerFormData, setOwnerFormData] = useState({
     role: "",
     q: "",
     page: 1,
-    pageSize: 20,
+    pageSize: 10,
     includeSensitive: false,
   });
   const [userTotal, setUserTotal] = useState(0);
@@ -167,7 +168,7 @@ const handleOwnerSubmit = async (e) => {
     try {
       const { data } = await api.get("/api/Admin/backoffices", {
         headers: { Authorization: `Bearer ${token}` },
-        params: { status: statusFilter || null, page, pageSize: 10 },
+        params: { status: statusFilter || null, page, pageSize: backOfficePageSize  },
       });
 
       setBackOffices(data.items || []);
@@ -585,7 +586,7 @@ const handleOwnerSubmit = async (e) => {
                               className="hover:bg-slate-50 transition-colors"
                             >
                               <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                                {(page - 1) * 10 + index + 1}
+                                {(page - 1) * backOfficePageSize  + index + 1}
                               </td>
                               <td className="px-6 py-4 text-sm font-mono text-slate-700 bg-slate-50 rounded-lg">
                                 {item.nic}
@@ -694,7 +695,7 @@ const handleOwnerSubmit = async (e) => {
                   </span>
                   <button
                     onClick={() => setPage((p) => p + 1)}
-                    disabled={page * 10 >= total}
+                    disabled={page * backOfficePageSize  >= total}
                     className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-slate-100 transition-all"
                   >
                     Next
