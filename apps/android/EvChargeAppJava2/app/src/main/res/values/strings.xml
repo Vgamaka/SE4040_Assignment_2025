@@ -1,0 +1,7 @@
+<resources>
+  <string name="app_name">EvChargeAppJava</string>
+
+  <string name="operator_title">Operator — Inbox</string>
+  <string name="scan_qr">Scan QR</string>
+  <string name="get_directions">Get Directions</string>
+</resources>

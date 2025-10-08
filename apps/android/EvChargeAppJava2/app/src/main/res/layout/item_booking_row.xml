@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#202020"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- Station name -->
+    <TextView
+        android:id="@+id/tvStation"
+        android:textColor="#f8f8f8"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- Date & time -->
+    <TextView
+        android:id="@+id/tvWhen"
+        android:textColor="#dcdcdc"
+        android:textSize="13sp"
+        android:layout_marginTop="4dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- Status -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:textColor="#9c9c9c"
+        android:textSize="12sp"
+        android:layout_marginTop="6dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

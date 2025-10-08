@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/rootDash"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="#0f0f0f">
+
+  <!-- Main scrollable content -->
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+      android:orientation="vertical"
+      android:padding="16dp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+      <!-- Header: title + notifications -->
+      <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+          android:id="@+id/tvTitle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Dashboard"
+          android:textColor="#f8f8f8"
+          android:textStyle="bold"
+          android:textSize="22sp" />
+
+        <ImageButton
+          android:id="@+id/btnNotif"
+          android:layout_width="40dp"
+          android:layout_height="40dp"
+          android:layout_alignParentEnd="true"
+          android:background="@android:color/transparent"
+          android:contentDescription="Notifications"
+          android:src="@android:drawable/ic_menu_info_details" />
+
+        <TextView
+          android:id="@+id/tvNotifBadge"
+          android:layout_width="20dp"
+          android:layout_height="20dp"
+          android:layout_alignEnd="@id/btnNotif"
+          android:layout_alignTop="@id/btnNotif"
+          android:layout_marginEnd="2dp"
+          android:layout_marginTop="2dp"
+          android:gravity="center"
+          android:background="#D62C2C"
+          android:textColor="#ffffff"
+          android:textSize="11sp"
+          android:visibility="gone"
+          android:text="0" />
+      </RelativeLayout>
+
+      <!-- Mini map card (tap to expand) -->
+      <LinearLayout
+        android:id="@+id/cardMap"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="16dp"
+        android:background="#202020"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="6dp">
+
+        <com.google.android.gms.maps.MapView
+          android:id="@+id/mapPreview"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent" />
+      </LinearLayout>
+
+      <!-- Tabs -->
+      <LinearLayout
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+          android:id="@+id/btnTabBookings"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="Bookings"
+          android:textAllCaps="false"
+          android:backgroundTint="#5DD62C"
+          android:textColor="#000000" />
+
+        <View
+          android:layout_width="12dp"
+          android:layout_height="1dp" />
+
+        <Button
+          android:id="@+id/btnTabStations"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="Stations"
+          android:textAllCaps="false"
+          android:backgroundTint="#202020"
+          android:textColor="#f8f8f8" />
+      </LinearLayout>
+
+      <!-- Panel: Bookings (today) -->
+      <LinearLayout
+        android:id="@+id/panelBookings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="12dp">
+
+        <Button
+          android:id="@+id/btnCreateBookingQuick"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Create Booking"
+          android:textAllCaps="false"
+          android:backgroundTint="#202020"
+          android:textColor="#f8f8f8" />
+
+        <ProgressBar
+          android:id="@+id/progressBookings"
+          style="?android:attr/progressBarStyle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal"
+          android:layout_marginTop="12dp"
+          android:visibility="gone" />
+
+        <TextView
+          android:id="@+id/tvBookingsEmpty"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="12dp"
+          android:text="No bookings for today"
+          android:textColor="#9c9c9c"
+          android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+          android:id="@+id/rvBookings"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp" />
+      </LinearLayout>
+
+      <!-- Panel: Stations (active) -->
+      <LinearLayout
+        android:id="@+id/panelStations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="12dp"
+        android:visibility="gone">
+
+        <ProgressBar
+          android:id="@+id/progressStations"
+          style="?android:attr/progressBarStyle"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal"
+          android:layout_marginTop="12dp"
+          android:visibility="gone" />
+
+        <TextView
+          android:id="@+id/tvStationsEmpty"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="12dp"
+          android:text="No active stations"
+          android:textColor="#9c9c9c"
+          android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+          android:id="@+id/rvStations"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp" />
+      </LinearLayout>
+
+    </LinearLayout>
+  </ScrollView>
+
+  <!-- Full-screen Map overlay (initially hidden) -->
+  <FrameLayout
+    android:id="@+id/fullMapOverlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#CC000000"
+    android:visibility="gone">
+
+    <FrameLayout
+      android:id="@+id/fullMapContainer"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent" />
+
+    <ImageButton
+      android:id="@+id/btnCloseFullMap"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:layout_gravity="top|end"
+      android:layout_margin="12dp"
+      android:background="@android:color/transparent"
+      android:contentDescription="Close map"
+      android:src="@android:drawable/ic_menu_close_clear_cancel" />
+  </FrameLayout>
+
+</FrameLayout>

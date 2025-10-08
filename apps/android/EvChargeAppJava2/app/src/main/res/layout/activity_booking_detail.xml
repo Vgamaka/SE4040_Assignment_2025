@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:background="#0f0f0f"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <LinearLayout
+    android:padding="16dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+      android:id="@+id/tvStatus"
+      android:textColor="#f8f8f8"
+      android:textSize="20sp"
+      android:textStyle="bold"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+    <TextView
+      android:id="@+id/tvMeta"
+      android:textColor="#dcdcdc"
+      android:textSize="14sp"
+      android:layout_marginTop="6dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:layout_marginTop="12dp">
+
+      <Button
+        android:id="@+id/btnModify"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Modify"
+        android:textAllCaps="false" />
+
+      <View
+        android:layout_width="12dp"
+        android:layout_height="1dp" />
+
+      <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Cancel"
+        android:textAllCaps="false" />
+    </LinearLayout>
+
+    <Button
+      android:id="@+id/btnIssueQr"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Get / Refresh QR"
+      android:layout_marginTop="16dp"/>
+
+    <ImageView
+      android:id="@+id/imgQr"
+      android:layout_width="280dp"
+      android:layout_height="280dp"
+      android:layout_gravity="center_horizontal"
+      android:contentDescription="QR"
+      android:layout_marginTop="16dp"
+      android:background="#202020" />
+
+    <!-- New: Directions button BELOW the QR -->
+    <Button
+      android:id="@+id/btnDirections"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Directions to station"
+      android:layout_marginTop="12dp" />
+
+    <TextView
+      android:id="@+id/tvQrToken"
+      android:textColor="#9c9c9c"
+      android:textSize="12sp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:textIsSelectable="true"/>
+  </LinearLayout>
+</ScrollView>

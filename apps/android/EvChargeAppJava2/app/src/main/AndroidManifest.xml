@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Required permissions -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+  <uses-permission android:name="android.permission.VIBRATE" />
+
+  <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.EvChargeAppJava"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config">
+
+        <!-- Splash is launcher -->
+        <activity
+            android:name=".ui.splash.SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Auth screens -->
+        <activity android:name=".ui.auth.LoginActivity" android:exported="false" />
+        <activity android:name=".ui.auth.SignupActivity" android:exported="false" />
+
+        <!-- Onboarding -->
+        <activity android:name=".ui.onboarding.OnboardingActivity" android:exported="false" />
+
+        <!-- Main shell -->
+        <activity android:name=".ui.main.MainActivity" android:exported="false" />
+
+        <!-- Default template activity kept (not launcher) -->
+        <activity android:name=".MainActivity" android:exported="false" />
+
+        <activity android:name=".ui.booking.MyBookingsActivity" android:exported="false"/>
+        <activity android:name=".ui.booking.BookingDetailActivity" android:exported="false"/>
+        <activity android:name=".ui.booking.CreateBookingActivity" android:exported="false"/>
+        <activity android:name=".ui.booking.BookingSummaryActivity" android:exported="false"/>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+        <activity android:name=".ui.stations.NearbyMapActivity" android:exported="false"/>
+        <activity android:name=".ui.stations.StationDetailActivity" android:exported="false"/>
+      <activity android:name=".ui.profile.OwnerProfileActivity" android:exported="false" />
+      <activity
+        android:name=".ui.operator.OperatorOneActivity"
+        android:exported="false"
+        android:screenOrientation="portrait"/>
+
+    </application>
+
+</manifest>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:padding="16dp"
+  android:background="#1A1A1A">
+
+  <!-- Main column -->
+  <LinearLayout
+    android:id="@+id/contentColumn"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- Header with Mark-all button -->
+    <LinearLayout
+      android:id="@+id/headerRow"
+      android:orientation="horizontal"
+      android:gravity="center_vertical"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:paddingBottom="8dp">
+
+      <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Notifications"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="18sp" />
+
+      <Button
+        android:id="@+id/btnMarkAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mark all read"
+        android:textAllCaps="false" />
+    </LinearLayout>
+
+    <!-- List -->
+    <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/rvNotifs"
+      android:layout_width="match_parent"
+      android:layout_height="300dp"
+      android:clipToPadding="false"
+      android:paddingBottom="8dp" />
+  </LinearLayout>
+
+  <!-- Empty state -->
+  <TextView
+    android:id="@+id/tvEmpty"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="No notifications"
+    android:textColor="#cccccc"
+    android:textSize="16sp"
+    android:gravity="center"
+    android:layout_gravity="center"
+    android:visibility="gone" />
+
+  <!-- Progress overlay -->
+  <ProgressBar
+    android:id="@+id/progress"
+    style="?android:attr/progressBarStyleLarge"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_gravity="center"
+    android:visibility="gone" />
+
+</FrameLayout>
