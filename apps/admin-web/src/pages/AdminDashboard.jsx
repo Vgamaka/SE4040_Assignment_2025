@@ -15,16 +15,16 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
 
   // EV Owner form state
-const [ownerFormData, setOwnerFormData] = useState({
-  nic: "",
-  fullName: "",
-  email: "",
-  phone: "",
-  password: "",
-  addressLine1: "",
-  addressLine2: "",
-  city: "",
-});
+  const [ownerFormData, setOwnerFormData] = useState({
+    nic: "",
+    fullName: "",
+    email: "",
+    phone: "",
+    password: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+  });
 
   const [ownerLoading, setOwnerLoading] = useState(false);
 
@@ -38,7 +38,7 @@ const [ownerFormData, setOwnerFormData] = useState({
   const [total, setTotal] = useState(0);
   const [loadingBackOffices, setLoadingBackOffices] = useState(false);
   const backOfficePageSize = 5;
-  
+
   // Note modal state
   const [noteModal, setNoteModal] = useState({
     show: false,
@@ -110,57 +110,56 @@ const [ownerFormData, setOwnerFormData] = useState({
     });
   };
 
-const handleOwnerSubmit = async (e) => {
-  e.preventDefault();
-  setOwnerLoading(true);
-  setMessage("");
+  const handleOwnerSubmit = async (e) => {
+    e.preventDefault();
+    setOwnerLoading(true);
+    setMessage("");
 
-  try {
-    const payload = {
-      nic: ownerFormData.nic,
-      fullName: ownerFormData.fullName,
-      email: ownerFormData.email,
-      phone: ownerFormData.phone,
-      password: ownerFormData.password,
-      addressLine1: ownerFormData.addressLine1 || "",
-      addressLine2: ownerFormData.addressLine2 || "",
-      city: ownerFormData.city || "",
-    };
+    try {
+      const payload = {
+        nic: ownerFormData.nic,
+        fullName: ownerFormData.fullName,
+        email: ownerFormData.email,
+        phone: ownerFormData.phone,
+        password: ownerFormData.password,
+        addressLine1: ownerFormData.addressLine1 || "",
+        addressLine2: ownerFormData.addressLine2 || "",
+        city: ownerFormData.city || "",
+      };
 
-    console.log("Sending EV Owner data:", payload);
+      console.log("Sending EV Owner data:", payload);
 
-    const { data } = await api.post("/api/EvOwner", payload);
+      const { data } = await api.post("/api/EvOwner", payload);
 
-    setMessage(`EV Owner registered successfully: ${data.fullName}`);
-    setOwnerFormData({
-      nic: "",
-      fullName: "",
-      email: "",
-      phone: "",
-      password: "",
-      addressLine1: "",
-      addressLine2: "",
-      city: "",
-    });
-    fetchUsers();
-  } catch (error) {
-    console.error("Error response:", error.response?.data);
+      setMessage(`EV Owner registered successfully: ${data.fullName}`);
+      setOwnerFormData({
+        nic: "",
+        fullName: "",
+        email: "",
+        phone: "",
+        password: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+      });
+      fetchUsers();
+    } catch (error) {
+      console.error("Error response:", error.response?.data);
 
-    if (error.response?.status === 409) {
-      setMessage("An owner with this NIC or email already exists.");
-    } else if (error.response?.status === 400) {
-      const errorData = error.response?.data;
-      setMessage(
-        `${errorData?.detail || "Invalid data. Please check your inputs."}`
-      );
-    } else {
-      setMessage("Something went wrong. Please try again.");
+      if (error.response?.status === 409) {
+        setMessage("An owner with this NIC or email already exists.");
+      } else if (error.response?.status === 400) {
+        const errorData = error.response?.data;
+        setMessage(
+          `${errorData?.detail || "Invalid data. Please check your inputs."}`
+        );
+      } else {
+        setMessage("Something went wrong. Please try again.");
+      }
+    } finally {
+      setOwnerLoading(false);
     }
-  } finally {
-    setOwnerLoading(false);
-  }
-};
-
+  };
 
   // -------------------- FETCH BACKOFFICES --------------------
   const fetchBackOffices = async () => {
@@ -168,7 +167,11 @@ const handleOwnerSubmit = async (e) => {
     try {
       const { data } = await api.get("/api/Admin/backoffices", {
         headers: { Authorization: `Bearer ${token}` },
-        params: { status: statusFilter || null, page, pageSize: backOfficePageSize  },
+        params: {
+          status: statusFilter || null,
+          page,
+          pageSize: backOfficePageSize,
+        },
       });
 
       setBackOffices(data.items || []);
@@ -282,6 +285,37 @@ const handleOwnerSubmit = async (e) => {
         setMessage("You don't have permission to update this user.");
       } else {
         setMessage("Failed to update user.");
+      }
+    }
+  };
+
+  // -------------------- ACTIVATE / DEACTIVATE EV OWNER --------------------
+  const handleToggleUserStatus = async (nic, isActive) => {
+    setMessage("");
+    try {
+      const endpoint = isActive
+        ? `/api/EvOwner/${nic}/deactivate`
+        : `/api/EvOwner/${nic}/reactivate`;
+
+      await api.put(
+        endpoint,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setMessage(
+        `User ${isActive ? "deactivated" : "reactivated"} successfully.`
+      );
+      fetchUsers(); // Refresh the user list
+    } catch (error) {
+      if (error.response?.status === 404) {
+        setMessage("User not found.");
+      } else if (error.response?.status === 403) {
+        setMessage("You don't have permission to modify this user.");
+      } else {
+        setMessage("Failed to update user status.");
       }
     }
   };
@@ -586,7 +620,7 @@ const handleOwnerSubmit = async (e) => {
                               className="hover:bg-slate-50 transition-colors"
                             >
                               <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                                {(page - 1) * backOfficePageSize  + index + 1}
+                                {(page - 1) * backOfficePageSize + index + 1}
                               </td>
                               <td className="px-6 py-4 text-sm font-mono text-slate-700 bg-slate-50 rounded-lg">
                                 {item.nic}
@@ -695,7 +729,7 @@ const handleOwnerSubmit = async (e) => {
                   </span>
                   <button
                     onClick={() => setPage((p) => p + 1)}
-                    disabled={page * backOfficePageSize  >= total}
+                    disabled={page * backOfficePageSize >= total}
                     className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-slate-100 transition-all"
                   >
                     Next
@@ -709,185 +743,186 @@ const handleOwnerSubmit = async (e) => {
         {/* --- Section 3: EV Owner Registration and Users --- */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
           {/* Register EV Owner Form */}
-<div className="xl:col-span-1">
-  <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-    <div className="flex items-center gap-3 mb-6">
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-        <svg
-          className="w-5 h-5 text-white"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-          />
-        </svg>
-      </div>
-      <h2 className="text-xl font-bold text-slate-800">Register EV Owner</h2>
-    </div>
+          <div className="xl:col-span-1">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-slate-800">
+                  Register EV Owner
+                </h2>
+              </div>
 
-    <div className="space-y-4">
-      {/* NIC */}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          NIC
-        </label>
-        <input
-          type="text"
-          name="nic"
-          placeholder="123456789V"
-          value={ownerFormData.nic}
-          onChange={handleOwnerChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        />
-      </div>
+              <div className="space-y-4">
+                {/* NIC */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    NIC
+                  </label>
+                  <input
+                    type="text"
+                    name="nic"
+                    placeholder="123456789V"
+                    value={ownerFormData.nic}
+                    onChange={handleOwnerChange}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-      {/* Full Name */}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          Full Name
-        </label>
-        <input
-          type="text"
-          name="fullName"
-          placeholder="Jane Smith"
-          value={ownerFormData.fullName}
-          onChange={handleOwnerChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        />
-      </div>
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    placeholder="Jane Smith"
+                    value={ownerFormData.fullName}
+                    onChange={handleOwnerChange}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-      {/* Email */}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          Email Address
-        </label>
-        <input
-          type="email"
-          name="email"
-          placeholder="jane@example.com"
-          value={ownerFormData.email}
-          onChange={handleOwnerChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        />
-      </div>
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="jane@example.com"
+                    value={ownerFormData.email}
+                    onChange={handleOwnerChange}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-      {/* Phone */}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          Phone Number
-        </label>
-        <input
-          type="text"
-          name="phone"
-          placeholder="+94 77 123 4567"
-          value={ownerFormData.phone}
-          onChange={handleOwnerChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        />
-      </div>
+                {/* Phone */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    name="phone"
+                    placeholder="+94 77 123 4567"
+                    value={ownerFormData.phone}
+                    onChange={handleOwnerChange}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-      {/* Address Line 1 */}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          Address Line 1
-        </label>
-        <input
-          type="text"
-          name="addressLine1"
-          placeholder="No. 25, Palm Grove"
-          value={ownerFormData.addressLine1}
-          onChange={handleOwnerChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        />
-      </div>
+                {/* Address Line 1 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Address Line 1
+                  </label>
+                  <input
+                    type="text"
+                    name="addressLine1"
+                    placeholder="No. 25, Palm Grove"
+                    value={ownerFormData.addressLine1}
+                    onChange={handleOwnerChange}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-      {/* Address Line 2 */}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          Address Line 2
-        </label>
-        <input
-          type="text"
-          name="addressLine2"
-          placeholder="Borella"
-          value={ownerFormData.addressLine2}
-          onChange={handleOwnerChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        />
-      </div>
+                {/* Address Line 2 */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Address Line 2
+                  </label>
+                  <input
+                    type="text"
+                    name="addressLine2"
+                    placeholder="Borella"
+                    value={ownerFormData.addressLine2}
+                    onChange={handleOwnerChange}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-      {/* City */}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          City
-        </label>
-        <input
-          type="text"
-          name="city"
-          placeholder="Colombo"
-          value={ownerFormData.city}
-          onChange={handleOwnerChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        />
-      </div>
+                {/* City */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    placeholder="Colombo"
+                    value={ownerFormData.city}
+                    onChange={handleOwnerChange}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-      {/* Password */}
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
-          Password
-        </label>
-        <input
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          value={ownerFormData.password}
-          onChange={handleOwnerChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        />
-      </div>
+                {/* Password */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    value={ownerFormData.password}
+                    onChange={handleOwnerChange}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
 
-      {/* Submit Button */}
-      <button
-        onClick={handleOwnerSubmit}
-        disabled={ownerLoading}
-        className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
-      >
-        {ownerLoading ? (
-          <span className="flex items-center justify-center gap-2">
-            <svg
-              className="animate-spin h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            Registering...
-          </span>
-        ) : (
-          "Register EV Owner"
-        )}
-      </button>
-    </div>
-  </div>
-</div>
-
+                {/* Submit Button */}
+                <button
+                  onClick={handleOwnerSubmit}
+                  disabled={ownerLoading}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
+                >
+                  {ownerLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg
+                        className="animate-spin h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Registering...
+                    </span>
+                  ) : (
+                    "Register EV Owner"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* --- Section 2: BackOffice Applications --- */}
           <div className="xl:col-span-2">
@@ -911,71 +946,6 @@ const handleOwnerSubmit = async (e) => {
                 <h2 className="text-xl font-bold text-slate-800">
                   All Users (EV Owners)
                 </h2>
-              </div>
-
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium text-slate-700">
-                      Role:
-                    </label>
-                    <select
-                      value={userFilters.role}
-                      onChange={(e) =>
-                        setUserFilters({
-                          ...userFilters,
-                          role: e.target.value,
-                          page: 1,
-                        })
-                      }
-                      className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                    >
-                      <option value="">All Roles</option>
-                      <option value="EV_Owner">EV Owner</option>
-                      <option value="BackOffice">BackOffice</option>
-                      <option value="Admin">Admin</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <label className="text-sm font-medium text-slate-700">
-                      Search:
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Name, email, NIC..."
-                      value={userFilters.q}
-                      onChange={(e) =>
-                        setUserFilters({
-                          ...userFilters,
-                          q: e.target.value,
-                          page: 1,
-                        })
-                      }
-                      className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={fetchUsers}
-                  className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:scale-105 transition-all duration-200 flex items-center gap-2"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  Refresh
-                </button>
               </div>
 
               {loadingUsers ? (
@@ -1045,9 +1015,6 @@ const handleOwnerSubmit = async (e) => {
                             Roles
                           </th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                             Actions
                           </th>
                         </tr>
@@ -1088,22 +1055,45 @@ const handleOwnerSubmit = async (e) => {
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <span
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
-                                  user.isActive
-                                    ? "bg-emerald-100 text-emerald-700"
-                                    : "bg-slate-100 text-slate-700"
-                                }`}
-                              >
-                                <span
-                                  className={`w-1.5 h-1.5 rounded-full ${
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  onClick={() =>
+                                    handleToggleUserStatus(
+                                      user.nic,
+                                      user.isActive
+                                    )
+                                  }
+                                  className={`px-4 py-2 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2 ${
                                     user.isActive
-                                      ? "bg-emerald-500"
-                                      : "bg-slate-500"
+                                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-orange-500/30 hover:shadow-orange-500/40"
+                                      : "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/40"
                                   }`}
-                                ></span>
-                                {user.isActive ? "Active" : "Inactive"}
-                              </span>
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    {user.isActive ? (
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                                      />
+                                    ) : (
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    )}
+                                  </svg>
+                                  {user.isActive ? "Deactivate" : "Reactivate"}
+                                </button>
+                              </div>
                             </td>
                             <td className="px-6 py-4">
                               <button
