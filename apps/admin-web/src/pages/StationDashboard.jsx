@@ -23,6 +23,16 @@ export default function StationDashboard() {
     toUtc: "",
   });
 
+  // Edit modal state
+  const [editModal, setEditModal] = useState({
+    isOpen: false,
+    bookingId: null,
+    localDate: "",
+    startTime: "",
+    minutes: "",
+    notes: "",
+  });
+
   useEffect(() => {
     if (stationId) {
       fetchStationInfo();
@@ -123,6 +133,62 @@ export default function StationDashboard() {
     } catch (err) {
       console.error("Error cancelling booking:", err);
       setMessage("Failed to cancel booking.");
+    }
+  };
+
+  // Edit functionality
+  const openEditModal = (booking) => {
+    const startDate = new Date(booking.slotStartUtc);
+    const localDate = startDate.toISOString().split('T')[0];
+    const startTime = startDate.toTimeString().slice(0, 5);
+
+    setEditModal({
+      isOpen: true,
+      bookingId: booking.id,
+      localDate: localDate,
+      startTime: startTime,
+      minutes: booking.slotMinutes.toString(),
+      notes: booking.notes || "",
+    });
+  };
+
+  const closeEditModal = () => {
+    setEditModal({
+      isOpen: false,
+      bookingId: null,
+      localDate: "",
+      startTime: "",
+      minutes: "",
+      notes: "",
+    });
+  };
+
+  const handleEditChange = (e) => {
+    setEditModal({ ...editModal, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    try {
+      await api.put(`/api/Booking/${editModal.bookingId}`, {
+        localDate: editModal.localDate,
+        startTime: editModal.startTime,
+        minutes: parseInt(editModal.minutes),
+        notes: editModal.notes,
+      });
+      setMessage("Booking updated successfully!");
+      closeEditModal();
+      fetchBookings();
+    } catch (err) {
+      console.error("Booking update failed:", err);
+      if (err.response?.status === 400)
+        setMessage("Bad request – check inputs.");
+      else if (err.response?.status === 403)
+        setMessage("Forbidden – you cannot edit this booking.");
+      else if (err.response?.status === 409)
+        setMessage("Conflict – slot full or station closed.");
+      else setMessage("An unexpected error occurred.");
     }
   };
 
@@ -494,16 +560,13 @@ export default function StationDashboard() {
                             Booking Code
                           </th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
-                            Station ID
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                             Start Time
                           </th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                             Duration
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
+                            Status
                           </th>
                           <th className="px-6 py-4 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">
                             Actions
@@ -518,23 +581,6 @@ export default function StationDashboard() {
                           >
                             <td className="px-6 py-4 text-sm font-mono text-slate-700 bg-slate-50 rounded-lg">
                               {b.bookingCode}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-slate-700">
-                              {b.stationId}
-                            </td>
-                            <td className="px-6 py-4">
-                              <span
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(
-                                  b.status
-                                )}`}
-                              >
-                                <span
-                                  className={`w-1.5 h-1.5 rounded-full ${getStatusDot(
-                                    b.status
-                                  )}`}
-                                ></span>
-                                {b.status}
-                              </span>
                             </td>
                             <td className="px-6 py-4 text-sm text-slate-600">
                               {new Date(b.slotStartUtc).toLocaleString(
@@ -552,28 +598,56 @@ export default function StationDashboard() {
                               {b.slotMinutes} mins
                             </td>
                             <td className="px-6 py-4">
+                              <span
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(
+                                  b.status
+                                )}`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${getStatusDot(
+                                    b.status
+                                  )}`}
+                                ></span>
+                                {b.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
                               {b.status === "Pending" ? (
                                 <div className="flex gap-2">
                                   <button
                                     onClick={() => handleApprove(b.id)}
-                                    className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg text-xs font-semibold shadow-md shadow-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-200"
+                                    className="px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg text-xs font-semibold shadow-md shadow-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-200"
                                   >
                                     Approve
                                   </button>
                                   <button
                                     onClick={() => handleReject(b.id)}
-                                    className="px-4 py-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-lg text-xs font-semibold shadow-md shadow-rose-500/30 hover:shadow-lg hover:shadow-rose-500/40 hover:scale-105 transition-all duration-200"
+                                    className="px-3 py-1.5 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-lg text-xs font-semibold shadow-md shadow-rose-500/30 hover:shadow-lg hover:shadow-rose-500/40 hover:scale-105 transition-all duration-200"
                                   >
                                     Reject
                                   </button>
+                                  <button
+                                    onClick={() => openEditModal(b)}
+                                    className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 transition-all duration-200"
+                                  >
+                                    Edit
+                                  </button>
                                 </div>
                               ) : b.status === "Approved" ? (
-                                <button
-                                  onClick={() => handleCancel(b.id)}
-                                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg text-xs font-semibold shadow-md shadow-amber-500/30 hover:shadow-lg hover:shadow-amber-500/40 hover:scale-105 transition-all duration-200"
-                                >
-                                  Cancel
-                                </button>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleCancel(b.id)}
+                                    className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg text-xs font-semibold shadow-md shadow-amber-500/30 hover:shadow-lg hover:shadow-amber-500/40 hover:scale-105 transition-all duration-200"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => openEditModal(b)}
+                                    className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 transition-all duration-200"
+                                  >
+                                    Edit
+                                  </button>
+                                </div>
                               ) : (
                                 <span className="text-slate-400 text-sm">
                                   —
@@ -591,6 +665,95 @@ export default function StationDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-slate-800">Edit Booking</h3>
+              <button
+                onClick={closeEditModal}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  name="localDate"
+                  value={editModal.localDate}
+                  onChange={handleEditChange}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Start Time
+                </label>
+                <input
+                  type="time"
+                  name="startTime"
+                  value={editModal.startTime}
+                  onChange={handleEditChange}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  name="minutes"
+                  value={editModal.minutes}
+                  onChange={handleEditChange}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 transition-all duration-200"
+                >
+                  Update Booking
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
