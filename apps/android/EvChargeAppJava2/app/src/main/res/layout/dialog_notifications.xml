@@ -1,72 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:padding="16dp"
-  android:background="#1A1A1A">
+  app:cardCornerRadius="10dp"
+  app:cardElevation="6dp"
+  app:cardBackgroundColor="@color/brand_surface"
+  app:cardUseCompatPadding="true"
+  android:padding="16dp">
 
-  <!-- Main column -->
-  <LinearLayout
-    android:id="@+id/contentColumn"
-    android:orientation="vertical"
+  <FrameLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <!-- Header with Mark-all button -->
+    <!-- Main column -->
     <LinearLayout
-      android:id="@+id/headerRow"
-      android:orientation="horizontal"
-      android:gravity="center_vertical"
+      android:id="@+id/contentColumn"
+      android:orientation="vertical"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:paddingBottom="8dp">
+      android:layout_height="wrap_content">
 
-      <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="0dp"
+      <!-- Header -->
+      <LinearLayout
+        android:id="@+id/headerRow"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Notifications"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="18sp" />
+        android:paddingBottom="8dp">
 
-      <Button
-        android:id="@+id/btnMarkAll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mark all read"
-        android:textAllCaps="false" />
+        <TextView
+          android:id="@+id/tvTitle"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="Notifications"
+          android:textColor="@color/m3_colorOnSurface"
+          android:textStyle="bold"
+          android:textSize="18sp" />
+
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnMarkAll"
+          style="@style/Widget.Material3.Button.TextButton"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Mark all read"
+          android:textAllCaps="false"
+          android:textColor="@color/m3_colorPrimary"
+          app:cornerRadius="20dp" />
+      </LinearLayout>
+
+      <!-- List -->
+      <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvNotifs"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
     </LinearLayout>
 
-    <!-- List -->
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/rvNotifs"
+    <!-- Empty state -->
+    <TextView
+      android:id="@+id/tvEmpty"
       android:layout_width="match_parent"
-      android:layout_height="300dp"
-      android:clipToPadding="false"
-      android:paddingBottom="8dp" />
-  </LinearLayout>
+      android:layout_height="wrap_content"
+      android:text="No notifications"
+      android:textColor="#A8A8A8"
+      android:textSize="16sp"
+      android:gravity="center"
+      android:layout_gravity="center"
+      android:visibility="gone"
+     />
 
-  <!-- Empty state -->
-  <TextView
-    android:id="@+id/tvEmpty"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="No notifications"
-    android:textColor="#cccccc"
-    android:textSize="16sp"
-    android:gravity="center"
-    android:layout_gravity="center"
-    android:visibility="gone" />
-
-  <!-- Progress overlay -->
-  <ProgressBar
-    android:id="@+id/progress"
-    style="?android:attr/progressBarStyleLarge"
-    android:layout_width="48dp"
-    android:layout_height="48dp"
-    android:layout_gravity="center"
-    android:visibility="gone" />
-
-</FrameLayout>
+    <!-- Progress overlay -->
+    <ProgressBar
+      android:id="@+id/progress"
+      style="?android:attr/progressBarStyleLarge"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:layout_gravity="center"
+      android:visibility="gone" />
+  </FrameLayout>
+</com.google.android.material.card.MaterialCardView>

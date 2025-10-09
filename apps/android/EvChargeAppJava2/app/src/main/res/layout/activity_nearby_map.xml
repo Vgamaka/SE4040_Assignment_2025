@@ -1,39 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="#0f0f0f"
-    android:padding="8dp"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/rootNearbyMap"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="#0F0F0F">
+
+  <!-- Map background (keep Z lowest) -->
+  <FrameLayout
+    android:id="@+id/mapContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:elevation="0dp"
+    android:translationZ="0dp" />
 
-    <!-- Simple controls -->
+  <!-- Close (top-left) -->
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/btnClose"
+    android:layout_width="46dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top|end"
+    android:layout_margin="16dp"
+    android:backgroundTint="#5DD62C"
+    android:contentDescription="Close map"
+    android:elevation="12dp"
+    app:srcCompat="@drawable/ic_close_24"
+    android:tint="#0F0F0F"
+    android:translationZ="12dp"
+    app:elevation="12dp"
+    app:maxImageSize="24dp" />
+
+  <!-- Top controls -->
+  <com.google.android.material.card.MaterialCardView
+    android:id="@+id/cardControls"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="top"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="10dp"
+    app:cardBackgroundColor="#202020"
+    android:padding="12dp"
+    android:elevation="10dp"
+    android:translationZ="10dp">
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:gravity="center_vertical">
 
-        <Button
-            android:id="@+id/btnMyLocation"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="My Location" />
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnMyLocation"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:text="My Location"
+        android:textAllCaps="false"
+        app:cornerRadius="24dp"
+        app:strokeColor="#5DD62C"
+        app:strokeWidth="1dp"
+        app:backgroundTint="#2A2A2A"
+        android:textColor="#5DD62C" />
 
-        <View android:layout_width="8dp" android:layout_height="1dp"/>
+      <View
+        android:layout_width="12dp"
+        android:layout_height="1dp" />
 
-        <Button
-            android:id="@+id/btnRefresh"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Refresh Nearby" />
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRefresh"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="54dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:text="Refresh Nearby"
+        android:textAllCaps="false"
+        android:textColor="#0F0F0F"
+        app:backgroundTint="#5DD62C"
+        app:cornerRadius="24dp" />
     </LinearLayout>
+  </com.google.android.material.card.MaterialCardView>
 
-    <!-- Map container fills the rest -->
-    <FrameLayout
-        android:id="@+id/mapContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_weight="1"/>
-</LinearLayout>
+  <!-- Filters FAB (bottom-right) -->
+</FrameLayout>

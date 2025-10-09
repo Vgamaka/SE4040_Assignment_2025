@@ -1,136 +1,316 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#0f0f0f"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/rootProfile"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:fillViewport="true"
+  android:background="@android:color/transparent">
+
+  <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
 
-    <LinearLayout
-        android:padding="16dp"
-        android:orientation="vertical"
+    <!-- header: NIC + title + logout -->
+    <TextView
+      android:id="@+id/tvNic"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="NIC: -"
+      android:textColor="#9c9c9c"
+      android:textSize="12sp"
+      android:layout_marginBottom="6dp" />
+
+    <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+      <TextView
+        android:id="@+id/tvProfileTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Owner Profile"
+        android:textColor="@color/m3_colorOnBackground"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogout"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:text="Logout"
+        android:textAllCaps="false"
+        app:cornerRadius="20dp"
+        app:strokeColor="@color/m3_colorOutline"
+        app:strokeWidth="1dp"
+        app:backgroundTint="@color/brand_surface"
+        android:textColor="@color/m3_colorOnSurface" />
+    </RelativeLayout>
+
+    <!-- card with editable fields -->
+    <com.google.android.material.card.MaterialCardView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      app:cardCornerRadius="20dp"
+      app:cardBackgroundColor="@color/brand_surface"
+      app:strokeWidth="0dp">
+
+      <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
 
+        <!-- common helper style -->
+        <!-- full name -->
         <TextView
-            android:id="@+id/tvNic"
-            android:text="NIC: -"
-            android:textColor="#9c9c9c"
-            android:textSize="12sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"/>
+          android:text="Full Name"
+          android:textColor="#dcdcdc"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
 
-        <TextView
-            android:text="Owner Profile"
-            android:textColor="#f8f8f8"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        <com.google.android.material.textfield.TextInputLayout
+          app:boxBackgroundMode="outline"
+          app:boxCornerRadiusTopStart="20dp"
+          app:boxCornerRadiusTopEnd="20dp"
+          app:boxCornerRadiusBottomStart="20dp"
+          app:boxCornerRadiusBottomEnd="20dp"
+          app:boxBackgroundColor="@color/brand_surface"
+          app:boxStrokeColor="@color/m3_colorPrimary"
+          app:boxStrokeWidth="1dp"
+          app:boxStrokeWidthFocused="2dp"
+          app:hintEnabled="false"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp">
 
-        <!-- Editable fields (auto-loaded) -->
-        <TextView
-            android:text="Full Name"
-            android:textColor="#dcdcdc"
-            android:layout_marginTop="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <EditText
+          <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etFullName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#f8f8f8"
-            android:textColorHint="#9c9c9c"/>
+            android:minHeight="56dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:includeFontPadding="false"
+            android:gravity="center_vertical"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textColorHint="#9c9c9c" />
+        </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- email -->
         <TextView
-            android:text="Email"
-            android:textColor="#dcdcdc"
-            android:layout_marginTop="12dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <EditText
+          android:text="Email"
+          android:textColor="#dcdcdc"
+          android:layout_marginTop="12dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+
+        <com.google.android.material.textfield.TextInputLayout
+          app:boxBackgroundMode="outline"
+          app:boxCornerRadiusTopStart="20dp"
+          app:boxCornerRadiusTopEnd="20dp"
+          app:boxCornerRadiusBottomStart="20dp"
+          app:boxCornerRadiusBottomEnd="20dp"
+          app:boxBackgroundColor="@color/brand_surface"
+          app:boxStrokeColor="@color/m3_colorPrimary"
+          app:boxStrokeWidth="1dp"
+          app:boxStrokeWidthFocused="2dp"
+          app:hintEnabled="false"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp">
+
+          <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="56dp"
             android:inputType="textEmailAddress"
-            android:textColor="#f8f8f8"
-            android:textColorHint="#9c9c9c"/>
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:includeFontPadding="false"
+            android:gravity="center_vertical"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textColorHint="#9c9c9c" />
+        </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- phone -->
         <TextView
-            android:text="Phone"
-            android:textColor="#dcdcdc"
-            android:layout_marginTop="12dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <EditText
+          android:text="Phone"
+          android:textColor="#dcdcdc"
+          android:layout_marginTop="12dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+
+        <com.google.android.material.textfield.TextInputLayout
+          app:boxBackgroundMode="outline"
+          app:boxCornerRadiusTopStart="20dp"
+          app:boxCornerRadiusTopEnd="20dp"
+          app:boxCornerRadiusBottomStart="20dp"
+          app:boxCornerRadiusBottomEnd="20dp"
+          app:boxBackgroundColor="@color/brand_surface"
+          app:boxStrokeColor="@color/m3_colorPrimary"
+          app:boxStrokeWidth="1dp"
+          app:boxStrokeWidthFocused="2dp"
+          app:hintEnabled="false"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp">
+
+          <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="56dp"
             android:inputType="phone"
-            android:textColor="#f8f8f8"
-            android:textColorHint="#9c9c9c"/>
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:includeFontPadding="false"
+            android:gravity="center_vertical"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textColorHint="#9c9c9c" />
+        </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- address line 1 -->
         <TextView
-            android:text="Address Line 1"
-            android:textColor="#dcdcdc"
-            android:layout_marginTop="12dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <EditText
+          android:text="Address Line 1"
+          android:textColor="#dcdcdc"
+          android:layout_marginTop="12dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+
+        <com.google.android.material.textfield.TextInputLayout
+          app:boxBackgroundMode="outline"
+          app:boxCornerRadiusTopStart="20dp"
+          app:boxCornerRadiusTopEnd="20dp"
+          app:boxCornerRadiusBottomStart="20dp"
+          app:boxCornerRadiusBottomEnd="20dp"
+          app:boxBackgroundColor="@color/brand_surface"
+          app:boxStrokeColor="@color/m3_colorPrimary"
+          app:boxStrokeWidth="1dp"
+          app:boxStrokeWidthFocused="2dp"
+          app:hintEnabled="false"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp">
+
+          <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLine1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#f8f8f8"
-            android:textColorHint="#9c9c9c"/>
+            android:minHeight="56dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:includeFontPadding="false"
+            android:gravity="center_vertical"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textColorHint="#9c9c9c" />
+        </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- address line 2 -->
         <TextView
-            android:text="Address Line 2"
-            android:textColor="#dcdcdc"
-            android:layout_marginTop="12dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <EditText
+          android:text="Address Line 2"
+          android:textColor="#dcdcdc"
+          android:layout_marginTop="12dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+
+        <com.google.android.material.textfield.TextInputLayout
+          app:boxBackgroundMode="outline"
+          app:boxCornerRadiusTopStart="20dp"
+          app:boxCornerRadiusTopEnd="20dp"
+          app:boxCornerRadiusBottomStart="20dp"
+          app:boxCornerRadiusBottomEnd="20dp"
+          app:boxBackgroundColor="@color/brand_surface"
+          app:boxStrokeColor="@color/m3_colorPrimary"
+          app:boxStrokeWidth="1dp"
+          app:boxStrokeWidthFocused="2dp"
+          app:hintEnabled="false"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp">
+
+          <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLine2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#f8f8f8"
-            android:textColorHint="#9c9c9c"/>
+            android:minHeight="56dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:includeFontPadding="false"
+            android:gravity="center_vertical"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textColorHint="#9c9c9c" />
+        </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- city -->
         <TextView
-            android:text="City"
-            android:textColor="#dcdcdc"
-            android:layout_marginTop="12dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <EditText
+          android:text="City"
+          android:textColor="#dcdcdc"
+          android:layout_marginTop="12dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+
+        <com.google.android.material.textfield.TextInputLayout
+          app:boxBackgroundMode="outline"
+          app:boxCornerRadiusTopStart="20dp"
+          app:boxCornerRadiusTopEnd="20dp"
+          app:boxCornerRadiusBottomStart="20dp"
+          app:boxCornerRadiusBottomEnd="20dp"
+          app:boxBackgroundColor="@color/brand_surface"
+          app:boxStrokeColor="@color/m3_colorPrimary"
+          app:boxStrokeWidth="1dp"
+          app:boxStrokeWidthFocused="2dp"
+          app:hintEnabled="false"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="4dp">
+
+          <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etCity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#f8f8f8"
-            android:textColorHint="#9c9c9c"/>
+            android:minHeight="56dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:includeFontPadding="false"
+            android:gravity="center_vertical"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textColorHint="#9c9c9c" />
+        </com.google.android.material.textfield.TextInputLayout>
+      </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save changes"
-            android:layout_marginTop="16dp"/>
+    <!-- action buttons -->
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/btnSave"
+      style="@style/Widget.Material3.Button"
+      android:layout_width="match_parent"
+      android:layout_height="48dp"
+      android:layout_marginTop="20dp"
+      android:text="Save changes"
+      android:textAllCaps="false"
+      app:cornerRadius="24dp"
+      app:backgroundTint="@color/m3_colorPrimary"
+      android:textColor="@color/brand_on_primary" />
 
-        <Button
-            android:id="@+id/btnDeactivate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Deactivate account"
-            android:layout_marginTop="8dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="16dp" />
-
-        <Button
-            android:id="@+id/btnLogout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Logout" />
-
-    </LinearLayout>
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/btnDeactivate"
+      style="@style/Widget.Material3.Button.OutlinedButton"
+      android:layout_width="match_parent"
+      android:layout_height="48dp"
+      android:layout_marginTop="12dp"
+      android:text="Deactivate account"
+      android:textAllCaps="false"
+      app:cornerRadius="24dp"
+      app:strokeColor="@color/m3_colorOutline"
+      app:strokeWidth="1dp"
+      app:backgroundTint="@color/brand_surface"
+      android:textColor="@color/m3_colorOnSurface" />
+  </LinearLayout>
 </ScrollView>

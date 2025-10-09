@@ -1,5 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+  <!-- === Base neutrals (legacy compatibility) === -->
+  <color name="black">#FF000000</color>
+  <color name="white">#FFFFFFFF</color>
+
+  <!-- === Brand palette (from your design brief) === -->
+  <color name="brand_background">#0f0f0f</color>
+  <color name="brand_surface">#202020</color>
+  <color name="brand_primary">#5DD62C</color>
+  <color name="brand_primary_variant">#337418</color>
+  <color name="brand_on_dark">#f8f8f8</color>
+  <color name="brand_on_primary">#0f0f0f</color>
+
+  <!-- === Material 3 color tokens mapping === -->
+  <!-- Primary system -->
+  <color name="m3_colorPrimary">@color/brand_primary</color>
+  <color name="m3_colorOnPrimary">@color/brand_on_primary</color>
+  <color name="m3_colorPrimaryContainer">@color/brand_primary_variant</color>
+  <color name="m3_colorOnPrimaryContainer">@color/brand_on_dark</color>
+
+  <!-- Secondary system -->
+  <color name="m3_colorSecondary">@color/brand_primary</color>
+  <color name="m3_colorOnSecondary">@color/brand_on_primary</color>
+  <color name="m3_colorSecondaryContainer">@color/brand_primary_variant</color>
+  <color name="m3_colorOnSecondaryContainer">@color/brand_on_dark</color>
+
+  <!-- Surfaces & backgrounds -->
+  <color name="m3_colorBackground">@color/brand_background</color>
+  <color name="m3_colorOnBackground">@color/brand_on_dark</color>
+  <color name="m3_colorSurface">@color/brand_surface</color>
+  <color name="m3_colorOnSurface">@color/brand_on_dark</color>
+  <color name="m3_colorSurfaceVariant">#2A2A2A</color>
+  <color name="m3_colorOnSurfaceVariant">@color/brand_on_dark</color>
+
+  <!-- Outline / divider -->
+  <color name="m3_colorOutline">#2A2A2A</color>
+
+  <!-- Pressed / ripple hints -->
+  <color name="press_primary">#337418</color>
+  <color name="press_surface">#161616</color>
+
 </resources>

@@ -1,89 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-  android:background="#0f0f0f"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/rootBookingDetail"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  android:fillViewport="true"
+  android:background="@android:color/transparent"
+  android:padding="20dp">
 
   <LinearLayout
-    android:padding="16dp"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <TextView
-      android:id="@+id/tvStatus"
-      android:textColor="#f8f8f8"
-      android:textSize="20sp"
+    <!-- Booking status chip -->
+    <com.google.android.material.chip.Chip
+      android:id="@+id/chipStatus"
+      style="@style/Widget.Material3.Chip.Assist"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Approved"
+      app:chipBackgroundColor="@color/m3_colorPrimaryContainer"
+      android:textColor="@color/m3_colorOnPrimaryContainer"
       android:textStyle="bold"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"/>
+      android:layout_gravity="end"
+      android:layout_marginBottom="8dp"
+      android:paddingHorizontal="8dp"
+      app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
-    <TextView
-      android:id="@+id/tvMeta"
-      android:textColor="#dcdcdc"
-      android:textSize="14sp"
-      android:layout_marginTop="6dp"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"/>
-
-    <LinearLayout
+    <!-- Card container -->
+    <com.google.android.material.card.MaterialCardView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      android:layout_marginTop="12dp">
+      app:cardCornerRadius="24dp"
+      app:cardBackgroundColor="@color/brand_surface"
+      app:cardElevation="4dp">
 
-      <Button
-        android:id="@+id/btnModify"
-        android:layout_width="0dp"
+      <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Modify"
-        android:textAllCaps="false" />
+        android:orientation="vertical"
+        android:padding="20dp">
 
-      <View
-        android:layout_width="12dp"
-        android:layout_height="1dp" />
+        <!-- Title / Status -->
+        <TextView
+          android:id="@+id/tvStatus"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Approved"
+          android:textStyle="bold"
+          android:textSize="22sp"
+          android:textColor="@color/m3_colorOnSurface" />
 
-      <Button
-        android:id="@+id/btnCancel"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Cancel"
-        android:textAllCaps="false" />
-    </LinearLayout>
+        <TextView
+          android:id="@+id/tvMeta"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Station X · 2025-10-09 16:07"
+          android:textColor="#BDBDBD"
+          android:textSize="14sp"
+          android:layout_marginTop="4dp"
+          android:lineSpacingExtra="2dp" />
 
-    <Button
-      android:id="@+id/btnIssueQr"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="Get / Refresh QR"
-      android:layout_marginTop="16dp"/>
+        <!-- Actions row -->
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:layout_marginTop="16dp"
+          android:gravity="center">
 
-    <ImageView
-      android:id="@+id/imgQr"
-      android:layout_width="280dp"
-      android:layout_height="280dp"
-      android:layout_gravity="center_horizontal"
-      android:contentDescription="QR"
-      android:layout_marginTop="16dp"
-      android:background="#202020" />
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnModify"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Modify"
+            android:textAllCaps="false"
+            app:cornerRadius="24dp" />
 
-    <!-- New: Directions button BELOW the QR -->
-    <Button
-      android:id="@+id/btnDirections"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="Directions to station"
-      android:layout_marginTop="12dp" />
 
-    <TextView
-      android:id="@+id/tvQrToken"
-      android:textColor="#9c9c9c"
-      android:textSize="12sp"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:textIsSelectable="true"/>
+          <View
+            android:layout_width="12dp"
+            android:layout_height="1dp" />
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            app:cornerRadius="24dp"
+            app:strokeColor="#D62C2C"
+            app:strokeWidth="1dp"
+            app:backgroundTint="@color/brand_surface"
+            android:textColor="#D62C2C" />
+        </LinearLayout>
+
+        <!-- QR area -->
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical"
+          android:gravity="center_horizontal"
+          android:layout_marginTop="20dp">
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnIssueQr"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Get / Refresh QR"
+            android:textAllCaps="false"
+            app:cornerRadius="24dp"
+            app:backgroundTint="@color/m3_colorPrimary"
+            android:textColor="@color/brand_on_primary" />
+
+          <ImageView
+            android:id="@+id/imgQr"
+            android:layout_width="260dp"
+            android:layout_height="260dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="QR"
+            android:background="@color/brand_surface"
+            android:padding="8dp" />
+        </LinearLayout>
+
+        <!-- Directions -->
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnDirections"
+          style="@style/Widget.Material3.Button.OutlinedButton"
+          android:layout_width="match_parent"
+          android:layout_height="48dp"
+          android:text="Directions to station"
+          android:textAllCaps="false"
+          app:cornerRadius="24dp"
+          app:strokeColor="@color/m3_colorOnPrimary"
+          app:strokeWidth="1dp"
+          app:backgroundTint="@color/m3_colorSurfaceVariant"
+          android:textColor="@color/m3_colorOnSurfaceVariant"
+          android:layout_marginTop="16dp" />
+
+
+        <!-- Token -->
+        <TextView
+          android:id="@+id/tvQrToken"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="QR_TOKEN_ABC123"
+          android:textColor="#9C9C9C"
+          android:textSize="12sp"
+          android:layout_marginTop="8dp"
+          android:textIsSelectable="true" />
+      </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
   </LinearLayout>
 </ScrollView>

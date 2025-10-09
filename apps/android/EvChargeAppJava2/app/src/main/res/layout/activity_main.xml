@@ -1,55 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main_root"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/main_root"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  android:background="@android:color/transparent">
+
+  <!-- Fragment container -->
+  <FrameLayout
+    android:id="@+id/fragment_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#0f0f0f">
+    android:layout_height="0dp"
+    android:layout_weight="1" />
 
-    <!-- Fragment container -->
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+  <!-- Bottom bar as a rounded/elevated surface -->
+  <com.google.android.material.card.MaterialCardView
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:layout_margin="12dp"
+    app:cardCornerRadius="20dp"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@color/brand_surface"
+    app:strokeColor="@color/m3_colorOutline"
+    app:strokeWidth="0dp">
 
-    <!-- Simple bottom bar with 3 buttons (no libs needed) -->
+    <!-- Keep SAME id for the inner layout so existing code still finds bottomBar -->
     <LinearLayout
-        android:id="@+id/bottomBar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#202020"
-        android:orientation="horizontal"
-        android:padding="8dp">
+      android:id="@+id/bottomBar"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="horizontal"
+      android:padding="8dp">
 
-        <Button
-            android:id="@+id/btnTabDash"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Dashboard"
-            android:textAllCaps="false"
-            android:textColor="#000000"
-            android:backgroundTint="#5DD62C" />
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTabDash"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Dashboard"
+        android:textAllCaps="false"
+        app:cornerRadius="24dp"
+        app:backgroundTint="@color/m3_colorPrimary"
+        android:textColor="@color/brand_on_primary"
+        android:stateListAnimator="@null"
+        android:translationZ="0dp" />
 
-        <Button
-            android:id="@+id/btnTabBookings"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Bookings"
-            android:textAllCaps="false"
-            android:textColor="#f8f8f8"
-            android:backgroundTint="#202020" />
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTabBookings"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Bookings"
+        android:textAllCaps="false"
+        app:cornerRadius="24dp"
+        app:strokeColor="@color/m3_colorOutline"
+        app:strokeWidth="1dp"
+        app:backgroundTint="@color/brand_surface"
+        android:textColor="@color/m3_colorOnSurface"
+        android:stateListAnimator="@null"
+        android:translationZ="0dp" />
 
-        <Button
-            android:id="@+id/btnTabProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Profile"
-            android:textAllCaps="false"
-            android:textColor="#f8f8f8"
-            android:backgroundTint="#202020" />
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTabProfile"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="Profile"
+        android:textAllCaps="false"
+        app:cornerRadius="24dp"
+        app:strokeColor="@color/m3_colorOutline"
+        app:strokeWidth="1dp"
+        app:backgroundTint="@color/brand_surface"
+        android:textColor="@color/m3_colorOnSurface"
+        android:stateListAnimator="@null"
+        android:translationZ="0dp" />
     </LinearLayout>
+  </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

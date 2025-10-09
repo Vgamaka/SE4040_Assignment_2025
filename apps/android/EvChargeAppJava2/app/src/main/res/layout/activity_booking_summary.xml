@@ -1,23 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#0f0f0f"
-    android:orientation="vertical"
-    android:padding="16dp"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/rootBookingSummary"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  android:padding="20dp"
+  android:background="@android:color/transparent">
+
+  <!-- Title -->
+  <TextView
+    android:id="@+id/tvSummaryTitle"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Review &amp; Confirm"
+    android:textStyle="bold"
+    android:textSize="24sp"
+    android:textColor="@color/m3_colorOnBackground"
+    android:paddingBottom="8dp" />
+
+  <!-- Summary card -->
+  <com.google.android.material.card.MaterialCardView
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:layout_marginTop="8dp"
+    app:cardCornerRadius="20dp"
+    app:cardBackgroundColor="@color/brand_surface"
+    app:cardElevation="3dp">
 
-    <TextView
-        android:id="@+id/tvSummary"
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      android:padding="16dp">
+
+      <!-- Keep your existing summary TextView (same ID) -->
+      <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <TextView
+          android:id="@+id/tvSummary"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Summary"
+          android:textColor="@color/m3_colorOnSurface"
+          android:textSize="16sp"
+          android:lineSpacingExtra="2dp" />
+      </ScrollView>
+
+      <!-- thin divider -->
+      <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@color/m3_colorOutline" />
+
+      <!-- subtle note -->
+      <TextView
+        android:id="@+id/tvPolicyNote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#f8f8f8"
-        android:textSize="16sp"
-        android:text="Summary"/>
+        android:text="You can modify or cancel 12 hours before the start time."
+        android:textSize="12sp"
+        android:textColor="#BDBDBD" />
+    </LinearLayout>
+  </com.google.android.material.card.MaterialCardView>
 
-    <Button
-        android:id="@+id/btnConfirm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Confirm Booking"
-        android:layout_marginTop="16dp"/>
+  <!-- Confirm CTA (same ID) -->
+  <com.google.android.material.button.MaterialButton
+    android:id="@+id/btnConfirm"
+    style="@style/Widget.Material3.Button"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:layout_marginTop="16dp"
+    android:text="Confirm Booking"
+    android:textAllCaps="false"
+    app:cornerRadius="28dp"
+    app:backgroundTint="@color/m3_colorPrimary"
+    android:textColor="@color/brand_on_primary"
+    android:stateListAnimator="@null"
+    android:translationZ="0dp" />
 </LinearLayout>

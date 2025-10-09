@@ -37,17 +37,22 @@ public final class BookingSummaryActivity extends AppCompatActivity {
     String time = payload != null ? JsonUtils.optString(payload, "startTime") : null;
     String minutes = payload != null ? String.valueOf(payload.optInt("minutes", 60)) : "60";
 
-    tvSummary.setText("Station: " + stationName
-      + "\nDate: " + date
-      + "\nStart: " + time
-      + "\nDuration: " + minutes + " mins"
-      + "\n\nPayload JSON:\n" + payloadStr);
+    // Show only concise booking details
+    tvSummary.setText(
+      "Station: " + stationName +
+        "\nDate: " + date +
+        "\nStart: " + time +
+        "\nDuration: " + minutes + " mins"
+    );
 
     btnConfirm.setOnClickListener(v -> doCreate());
   }
 
   private void doCreate() {
-    if (payload == null) { toast("Invalid payload"); return; }
+    if (payload == null) {
+      toast("Invalid booking details");
+      return;
+    }
 
     btnConfirm.setEnabled(false);
 
@@ -58,20 +63,21 @@ public final class BookingSummaryActivity extends AppCompatActivity {
       runOnUiThread(() -> {
         btnConfirm.setEnabled(true);
 
-        // Always show what happened
-        String detail = (r.body != null ? r.body : (r.message != null ? r.message : ""));
-        toast("Create result: " + r.code + (detail.isEmpty() ? "" : " · " + shrink(detail, 140)));
-
         if (r.ok) {
-          // Navigate to My Bookings so you can verify immediately
+          toast("Booking created successfully");
           startActivity(new Intent(this, MyBookingsActivity.class));
           finish();
+        } else {
+          String msg = (r.message != null && !r.message.isEmpty())
+            ? r.message
+            : "Booking failed (" + r.code + ")";
+          toast(msg);
         }
       });
     }).start();
   }
 
-  private static String shrink(String s, int max) { return (s != null && s.length() > max) ? s.substring(0, max) + "…" : (s != null ? s : ""); }
-
-  private void toast(String m){ Toast.makeText(this, m, Toast.LENGTH_LONG).show(); }
+  private void toast(String m) {
+    Toast.makeText(this, m, Toast.LENGTH_LONG).show();
+  }
 }

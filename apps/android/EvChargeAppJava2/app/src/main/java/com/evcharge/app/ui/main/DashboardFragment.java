@@ -1,25 +1,20 @@
 package com.evcharge.app.ui.main;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.*;
-import android.widget.FrameLayout;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.fragment.app.FragmentResultListener;
 
 import com.evcharge.app.R;
 import com.evcharge.app.core.net.ApiClient;
@@ -27,9 +22,12 @@ import com.evcharge.app.core.util.JsonUtils;
 import com.evcharge.app.ui.booking.BookingDetailActivity;
 import com.evcharge.app.ui.booking.BookingListAdapter;
 import com.evcharge.app.ui.booking.CreateBookingActivity;
-import com.evcharge.app.ui.notifications.NotificationsDialog;
+import com.evcharge.app.ui.stations.NearbyMapActivity;
 import com.evcharge.app.ui.stations.StationDetailActivity;
-import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -54,26 +52,12 @@ public final class DashboardFragment extends Fragment {
   private ProgressBar progressBookings, progressStations;
   private RecyclerView rvBookings, rvStations;
 
-  // Full-screen overlay
-  private View fullMapOverlay;
-  private FrameLayout fullMapContainer;
-  private ImageButton btnCloseFullMap;
-
   // Adapters
   private BookingListAdapter bookingsAdapter;
   private StationAdapter stationsAdapter;
 
   // Maps
   private GoogleMap previewMap;
-  private GoogleMap fullMap;
-
-  // Permission launcher for full map "My Location" (optional)
-  private final ActivityResultLauncher<String> reqFineLocation =
-    registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-      if (fullMap != null && granted) {
-        tryEnableMyLocation(fullMap);
-      }
-    });
 
   @Nullable
   @Override
@@ -90,23 +74,27 @@ public final class DashboardFragment extends Fragment {
       mapView.onCreate(savedInstanceState);
       mapView.getMapAsync(gm -> {
         previewMap = gm;
+        // Make preview behave like a thumbnail (non-interactive)
         UiSettings ui = gm.getUiSettings();
-        ui.setMapToolbarEnabled(false);
+        ui.setAllGesturesEnabled(false);
         ui.setZoomControlsEnabled(false);
+        ui.setMapToolbarEnabled(false);
+        ui.setCompassEnabled(false);
+
         LatLng colombo = new LatLng(6.9271, 79.8612);
         gm.moveCamera(CameraUpdateFactory.newLatLngZoom(colombo, 12f));
         loadMapPreview(colombo.latitude, colombo.longitude);
-        // Tap anywhere on the preview -> expand
-        gm.setOnMapClickListener(latLng -> showFullMap());
+
+        // Tapping the map preview opens the full map screen
+        gm.setOnMapClickListener(latLng ->
+          startActivity(new Intent(requireContext(), NearbyMapActivity.class)));
       });
     }
-    if (cardMap != null) cardMap.setOnClickListener(view -> showFullMap());
 
-    // Full-screen overlay refs
-    fullMapOverlay   = v.findViewById(R.id.fullMapOverlay);
-    fullMapContainer = v.findViewById(R.id.fullMapContainer);
-    btnCloseFullMap  = v.findViewById(R.id.btnCloseFullMap);
-    if (btnCloseFullMap != null) btnCloseFullMap.setOnClickListener(view -> hideFullMap());
+    if (cardMap != null) {
+      cardMap.setOnClickListener(view ->
+        startActivity(new Intent(requireContext(), NearbyMapActivity.class)));
+    }
 
     // Tabs
     btnTabBookings = v.findViewById(R.id.btnTabBookings);
@@ -124,11 +112,9 @@ public final class DashboardFragment extends Fragment {
     // Notifications
     btnNotif = v.findViewById(R.id.btnNotif);
     tvBadge  = v.findViewById(R.id.tvNotifBadge);
-    // open dialog
     if (btnNotif != null) btnNotif.setOnClickListener(view ->
       new com.evcharge.app.ui.notifications.NotificationsDialog()
         .show(getParentFragmentManager(), "notifs"));
-    // refresh badge when dialog is dismissed
     getParentFragmentManager().setFragmentResultListener(
       "notifDismiss",
       getViewLifecycleOwner(),
@@ -187,7 +173,7 @@ public final class DashboardFragment extends Fragment {
         }
         if (previewMap == null || arr == null) return;
 
-        for (int i=0;i<Math.min(arr.length(), 5);i++){
+        for (int i = 0; i < Math.min(arr.length(), 5); i++) {
           JSONObject o = arr.optJSONObject(i); if (o == null) continue;
 
           String status = JsonUtils.optString(o, "status");
@@ -212,137 +198,6 @@ public final class DashboardFragment extends Fragment {
             }
           });
         }
-      } catch (Exception ignored) {}
-    }).start();
-  }
-
-  // ---------- Full-screen map ----------
-  private void showFullMap() {
-    if (fullMapOverlay == null || fullMapContainer == null) return;
-
-    // Show overlay with a small fade-in
-    fullMapOverlay.setAlpha(0f);
-    fullMapOverlay.setVisibility(View.VISIBLE);
-    fullMapOverlay.animate().alpha(1f).setDuration(150).start();
-
-    // If there’s already a fragment inside, reuse it; else attach one
-    Fragment existing = getChildFragmentManager().findFragmentById(R.id.fullMapContainer);
-    if (!(existing instanceof SupportMapFragment)) {
-      SupportMapFragment smf = SupportMapFragment.newInstance();
-      getChildFragmentManager()
-        .beginTransaction()
-        .replace(R.id.fullMapContainer, smf)
-        .commitNowAllowingStateLoss();
-
-      smf.getMapAsync(gm -> {
-        fullMap = gm;
-        UiSettings ui = gm.getUiSettings();
-        ui.setZoomControlsEnabled(true);
-        ui.setMapToolbarEnabled(true);
-
-        LatLng colombo = new LatLng(6.9271, 79.8612);
-        gm.moveCamera(CameraUpdateFactory.newLatLngZoom(colombo, 13f));
-        tryEnableMyLocation(gm);
-
-        // Marker taps → Station detail
-        gm.setOnInfoWindowClickListener(marker -> {
-          Object tag = marker.getTag();
-          if (tag instanceof String) {
-            Intent i = new Intent(requireContext(), StationDetailActivity.class);
-            i.putExtra("stationId", (String) tag);
-            startActivity(i);
-          }
-        });
-
-        // Initial nearby load
-        loadFullMapStations(colombo.latitude, colombo.longitude);
-
-        // Also load again when user stops moving camera
-        gm.setOnCameraIdleListener(() -> {
-          LatLng c = gm.getCameraPosition().target;
-          loadFullMapStations(c.latitude, c.longitude);
-        });
-      });
-    }
-  }
-
-  private void hideFullMap() {
-    if (fullMapOverlay == null) return;
-    fullMapOverlay.animate().alpha(0f).setDuration(120).withEndAction(() -> {
-      // Clean up the fragment to free GL/context
-      Fragment f = getChildFragmentManager().findFragmentById(R.id.fullMapContainer);
-      if (f != null) {
-        getChildFragmentManager()
-          .beginTransaction()
-          .remove(f)
-          .commitNowAllowingStateLoss();
-      }
-      fullMap = null;
-      fullMapOverlay.setVisibility(View.GONE);
-    }).start();
-  }
-
-  private void tryEnableMyLocation(GoogleMap map) {
-    try {
-      if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-        == PackageManager.PERMISSION_GRANTED) {
-        map.setMyLocationEnabled(true);
-      } else {
-        reqFineLocation.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-      }
-    } catch (SecurityException ignored) {}
-  }
-
-  private void loadFullMapStations(double lat, double lng) {
-    if (fullMap == null) return;
-    new Thread(() -> {
-      try {
-        ApiClient api = new ApiClient(requireContext().getApplicationContext());
-        com.evcharge.app.core.net.HttpClient.Response r =
-          api.stationsNearbyRaw(lat, lng, 5, "AC");
-        JSONArray arr = (r != null ? r.jsonArray : null);
-        if (arr == null && r != null && r.body != null) {
-          try { arr = new JSONArray(r.body); } catch (Exception ignored) {}
-        }
-        if (arr == null) return;
-
-        // Build a small set (limit for perf)
-        final List<MarkerOptions> mos = new ArrayList<>();
-        final List<String> ids = new ArrayList<>();
-
-        for (int i=0;i<arr.length();i++){
-          JSONObject o = arr.optJSONObject(i); if (o == null) continue;
-
-          String status = JsonUtils.optString(o, "status");
-          if (status == null) status = JsonUtils.optString(o, "Status");
-          if (status == null || !"active".equalsIgnoreCase(status)) continue;
-
-          String id = JsonUtils.optString(o, "id");
-          if (id == null) id = JsonUtils.optString(o, "stationId");
-
-          double sLat = o.optDouble("lat", Double.NaN);
-          double sLng = o.optDouble("lng", Double.NaN);
-          if (Double.isNaN(sLat) || Double.isNaN(sLng)) continue;
-
-          String name = JsonUtils.optString(o, "name");
-          if (name == null) name = "Station";
-
-          MarkerOptions mo = new MarkerOptions()
-            .position(new LatLng(sLat, sLng))
-            .title(name)
-            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-          mos.add(mo);
-          ids.add(id);
-        }
-
-        requireActivity().runOnUiThread(() -> {
-          if (fullMap == null) return;
-          fullMap.clear();
-          for (int i = 0; i < mos.size(); i++) {
-            com.google.android.gms.maps.model.Marker m = fullMap.addMarker(mos.get(i));
-            if (m != null && ids.get(i) != null) m.setTag(ids.get(i));
-          }
-        });
       } catch (Exception ignored) {}
     }).start();
   }
@@ -374,8 +229,8 @@ public final class DashboardFragment extends Fragment {
         List<BookingListAdapter.Row> rows = new ArrayList<>();
         rows.add(new BookingListAdapter.HeaderRow("Today"));
 
-        for (int i=0;i<arr.length();i++){
-          JSONObject o = arr.optJSONObject(i); if (o==null) continue;
+        for (int i = 0; i < arr.length(); i++) {
+          JSONObject o = arr.optJSONObject(i); if (o == null) continue;
 
           String id = JsonUtils.optString(o, "id");
           if (id == null) id = JsonUtils.optString(o, "bookingId");
@@ -383,7 +238,6 @@ public final class DashboardFragment extends Fragment {
 
           String station = JsonUtils.optString(o, "stationName");
           if (station == null) {
-            // fallback via StationId -> detail
             String stId = JsonUtils.optString(o, "stationId");
             if (stId == null) {
               JSONObject stObj = o.optJSONObject("StationId");
@@ -408,14 +262,14 @@ public final class DashboardFragment extends Fragment {
 
           String dateYmd = null, hm = null;
           if (local != null && local.length() >= 16) {
-            dateYmd = local.substring(0,10);
-            hm = local.substring(11,16);
+            dateYmd = local.substring(0, 10);
+            hm = local.substring(11, 16);
           } else {
             String startUtc = JsonUtils.optString(o, "slotStartUtc");
             if (startUtc == null) startUtc = JsonUtils.optString(o, "SlotStartUtc");
             if (startUtc != null && startUtc.length() >= 16) {
-              dateYmd = startUtc.substring(0,10);
-              hm = startUtc.substring(11,16) + "Z";
+              dateYmd = startUtc.substring(0, 10);
+              hm = startUtc.substring(11, 16) + "Z";
             }
           }
 
@@ -440,7 +294,7 @@ public final class DashboardFragment extends Fragment {
     }).start();
   }
 
-  private void setBusyBookings(boolean b){
+  private void setBusyBookings(boolean b) {
     if (!isAdded()) return;
     requireActivity().runOnUiThread(() -> {
       progressBookings.setVisibility(b ? View.VISIBLE : View.GONE);
@@ -484,8 +338,8 @@ public final class DashboardFragment extends Fragment {
         final List<String> stationNames = new ArrayList<>();
 
         if (arr != null) {
-          for (int i=0;i<arr.length();i++){
-            JSONObject o = arr.optJSONObject(i); if (o==null) continue;
+          for (int i = 0; i < arr.length(); i++) {
+            JSONObject o = arr.optJSONObject(i); if (o == null) continue;
 
             String id = JsonUtils.optString(o,"id");
             if (id == null) {
@@ -535,7 +389,7 @@ public final class DashboardFragment extends Fragment {
     }).start();
   }
 
-  private void setBusyStations(boolean b){
+  private void setBusyStations(boolean b) {
     if (!isAdded()) return;
     requireActivity().runOnUiThread(() -> {
       progressStations.setVisibility(b ? View.VISIBLE : View.GONE);
@@ -562,10 +416,10 @@ public final class DashboardFragment extends Fragment {
 
   private static String ymd(Calendar c) {
     return String.format(Locale.US, "%04d-%02d-%02d",
-      c.get(Calendar.YEAR), c.get(Calendar.MONTH)+1, c.get(Calendar.DAY_OF_MONTH));
+      c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH));
   }
 
-  private void toast(String m){
+  private void toast(String m) {
     if (!isAdded()) return;
     Toast.makeText(requireContext(), m, Toast.LENGTH_SHORT).show();
   }

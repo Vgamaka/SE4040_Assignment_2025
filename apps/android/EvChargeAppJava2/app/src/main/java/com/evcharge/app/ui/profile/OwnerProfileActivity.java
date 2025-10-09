@@ -1,15 +1,12 @@
 package com.evcharge.app.ui.profile;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
-import android.text.InputType;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.evcharge.app.R;
@@ -76,7 +73,6 @@ public final class OwnerProfileActivity extends AppCompatActivity {
   }
 
   private void render(JSONObject o) {
-    // Fill fields from response
     String nic = JsonUtils.optString(o, "nic");
     String fullName = JsonUtils.optString(o, "fullName");
     String email = JsonUtils.optString(o, "email");
@@ -123,17 +119,20 @@ public final class OwnerProfileActivity extends AppCompatActivity {
     }).start();
   }
 
+  /** Confirmation dialog before deactivation **/
   private void confirmDeactivate() {
     final String nic = etNic.getText().toString().trim();
     if (nic.isEmpty()) { toast("Enter NIC"); return; }
-    new AlertDialog.Builder(this)
-      .setTitle("Deactivate account?")
-      .setMessage("This will deactivate the owner profile. Continue?")
-      .setPositiveButton("Deactivate", (d, w) -> doDeactivate(nic))
+
+    new AlertDialog.Builder(this, com.google.android.material.R.style.ThemeOverlay_Material3_Dialog_Alert)
+      .setTitle("Confirm Deactivation")
+      .setMessage("Are you sure you want to deactivate this account?\nYou can later request reactivation through BackOffice.")
+      .setPositiveButton("Deactivate", (dialog, which) -> doDeactivate(nic))
       .setNegativeButton("Cancel", null)
       .show();
   }
 
+  /** Actual API call **/
   private void doDeactivate(String nic) {
     btnDeactivate.setEnabled(false);
     new Thread(() -> {
@@ -143,12 +142,16 @@ public final class OwnerProfileActivity extends AppCompatActivity {
         btnDeactivate.setEnabled(true);
         String detail = (r.body != null ? r.body : (r.message != null ? r.message : ""));
         toast("Deactivate: " + r.code + (detail.isEmpty() ? "" : " · " + shrink(detail, 140)));
-        if (r.ok) finish();
+        if (r.ok) finish(); // close activity
       });
     }).start();
   }
 
-  private static String shrink(String s, int max) { return (s != null && s.length() > max) ? s.substring(0, max) + "…" : (s != null ? s : ""); }
+  private static String shrink(String s, int max) {
+    return (s != null && s.length() > max) ? s.substring(0, max) + "…" : (s != null ? s : "");
+  }
 
-  private void toast(String m){ Toast.makeText(this, m, Toast.LENGTH_LONG).show(); }
+  private void toast(String m) {
+    Toast.makeText(this, m, Toast.LENGTH_LONG).show();
+  }
 }
