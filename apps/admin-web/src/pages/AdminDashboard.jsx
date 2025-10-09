@@ -215,29 +215,30 @@ export default function AdminDashboard() {
   };
 
   // -------------------- FETCH USERS --------------------
-  const fetchUsers = async () => {
-    setLoadingUsers(true);
-    try {
-      const { data } = await api.get("/api/Admin/users", {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          role: userFilters.role || null,
-          q: userFilters.q || null,
-          page: userFilters.page,
-          pageSize: userFilters.pageSize,
-          includeSensitive: userFilters.includeSensitive,
-        },
-      });
+const fetchUsers = async () => {
+  setLoadingUsers(true);
+  try {
+    const { data } = await api.get("/api/Admin/users", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        role: "Owner", // ✅ Fetch only users with "Owner" role
+        q: userFilters.q || null,
+        page: userFilters.page,
+        pageSize: userFilters.pageSize,
+        includeSensitive: userFilters.includeSensitive,
+      },
+    });
 
-      setUsers(data.items || []);
-      setUserTotal(data.total || 0);
-    } catch (error) {
-      console.error(error);
-      setMessage("Failed to fetch users.");
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
+    setUsers(data.items || []);
+    setUserTotal(data.total || 0);
+  } catch (error) {
+    console.error(error);
+    setMessage("Failed to fetch Owner users.");
+  } finally {
+    setLoadingUsers(false);
+  }
+};
+
 
   useEffect(() => {
     fetchUsers();
