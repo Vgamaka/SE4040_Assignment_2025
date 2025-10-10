@@ -110,34 +110,38 @@ namespace EvCharge.Api.Controllers
         /// <summary>
         /// Deactivate own account (self-only). Login will be blocked after deactivation.
         /// </summary>
-        [Authorize]
-        [HttpPut("{nic}/deactivate")]
-        [ProducesResponseType(typeof(OwnerResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Deactivate([FromRoute] string nic, CancellationToken ct)
-        {
-            var actorNic = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value
-                        ?? User.Identity?.Name
-                        ?? string.Empty;
+[Authorize(Roles = "Owner,Admin")]
+[HttpPut("{nic}/deactivate")]
+[ProducesResponseType(typeof(OwnerResponse), StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+public async Task<IActionResult> Deactivate([FromRoute] string nic, CancellationToken ct)
+{
+    var actorNic = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value
+                ?? User.Identity?.Name
+                ?? string.Empty;
 
-            if (!string.Equals(actorNic, nic, StringComparison.Ordinal))
-                return Forbid(); // self-only
+    var actorRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-            try
-            {
-                var res = await _service.DeactivateAsync(nic, actorNic, ct);
-                return Ok(res);
-            }
-            catch (NotFoundException ex) when (ex.Code == "OwnerNotFound")
-            {
-                return NotFound(new { error = ex.Code, message = ex.Message });
-            }
-            catch (UpdateException ex) when (ex.Code == "ConcurrencyConflict")
-            {
-                return Problem(statusCode: StatusCodes.Status409Conflict, detail: ex.Message, title: ex.Code);
-            }
-        }
+    // Allow self-deactivation for Owners, and Admins can deactivate anyone
+    if (!string.Equals(actorNic, nic, StringComparison.OrdinalIgnoreCase) && actorRole != "Admin")
+        return Forbid();
+
+    try
+    {
+        var res = await _service.DeactivateAsync(nic, actorNic, ct);
+        return Ok(res);
+    }
+    catch (NotFoundException ex) when (ex.Code == "OwnerNotFound")
+    {
+        return NotFound(new { error = ex.Code, message = ex.Message });
+    }
+    catch (UpdateException ex) when (ex.Code == "ConcurrencyConflict")
+    {
+        return Problem(statusCode: StatusCodes.Status409Conflict, detail: ex.Message, title: ex.Code);
+    }
+}
+
 
         /// <summary>
         /// Reactivate an owner account (BackOffice/Admin only).
