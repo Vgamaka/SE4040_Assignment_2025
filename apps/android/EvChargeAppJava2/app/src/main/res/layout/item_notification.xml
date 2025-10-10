@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:layout_marginBottom="8dp"
+  app:cardCornerRadius="14dp"
+  app:cardElevation="2dp"
+  app:cardUseCompatPadding="true"
+  app:cardBackgroundColor="@color/brand_surface"
+  android:foreground="?attr/selectableItemBackground"
+  android:clickable="true"
+  android:focusable="true">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="12dp"
+    android:paddingHorizontal="16dp">
+
+    <!-- Notification subject -->
+    <TextView
+      android:id="@+id/tvSubject"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Booking Approved"
+      android:textStyle="bold"
+      android:textSize="15sp"
+      android:textColor="@color/m3_colorOnSurface"
+      android:ellipsize="end"
+      android:singleLine="true" />
+
+    <!-- Notification message -->
+    <TextView
+      android:id="@+id/tvMessage"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="2dp"
+      android:text="Your booking for Station A was approved."
+      android:textColor="#CCCCCC"
+      android:textSize="13sp"
+      android:maxLines="2"
+      android:ellipsize="end" />
+
+    <!-- Timestamp -->
+    <TextView
+      android:id="@+id/tvTime"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="6dp"
+      android:text="10:32 AM · Today"
+      android:textColor="#9C9C9C"
+      android:textSize="11sp" />
+  </LinearLayout>
+
+  <!-- optional unread edge indicator -->
+  <View
+    android:id="@+id/unreadIndicator"
+    android:layout_width="4dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="@color/m3_colorPrimary"
+    android:visibility="gone" />
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/splashRoot"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@drawable/bg_app">
+
+  <!-- Subtle dark scrim over the bg to boost contrast -->
+  <View
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#66000000" />
+
+  <!-- Center stage container (a frosted card look) -->
+  <com.google.android.material.card.MaterialCardView
+    android:id="@+id/stageCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_margin="24dp"
+    app:cardCornerRadius="24dp"
+    app:cardUseCompatPadding="true"
+    app:cardElevation="10dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/m3_colorOutline"
+    app:cardBackgroundColor="@color/brand_surface">
+
+    <!-- We stack your 3 stages here; SplashActivity toggles their visibility -->
+    <FrameLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:padding="24dp">
+
+      <!-- Optional logo (kept invisible by default) -->
+      <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginBottom="12dp"
+        android:contentDescription="@string/app_name"
+        android:src="@android:drawable/ic_dialog_info"
+        android:tint="@color/m3_colorPrimary"
+        android:visibility="gone" />
+
+      <!-- ========== Stage 1 ========== -->
+      <LinearLayout
+        android:id="@+id/stage1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="visible"
+        android:alpha="1">
+
+        <TextView
+          android:id="@+id/s1Title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Find and Book Stations"
+          android:textColor="@color/m3_colorOnBackground"
+          android:textSize="26sp"
+          android:textStyle="bold"
+          android:letterSpacing="0.01" />
+
+        <TextView
+          android:id="@+id/s1Body"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="10dp"
+          android:text="Discover nearby chargers, see live availability, and book your slot."
+          android:textColor="@color/m3_colorOnBackground"
+          android:textSize="15sp"
+          android:lineSpacingExtra="2dp" />
+      </LinearLayout>
+
+      <!-- ========== Stage 2 ========== -->
+      <LinearLayout
+        android:id="@+id/stage2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:alpha="0">
+
+        <TextView
+          android:id="@+id/s2Title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Smart Scheduling"
+          android:textColor="@color/m3_colorOnBackground"
+          android:textSize="26sp"
+          android:textStyle="bold"
+          android:letterSpacing="0.01" />
+
+        <!-- UPDATED copy to be app-specific -->
+        <TextView
+          android:id="@+id/s2Body"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="10dp"
+          android:text="Server-side rules keep things fair—slot limits, pricing, and check-in are handled automatically."
+          android:textColor="@color/m3_colorOnBackground"
+          android:textSize="15sp"
+          android:lineSpacingExtra="2dp" />
+      </LinearLayout>
+
+      <!-- ========== Stage 3 ========== -->
+      <LinearLayout
+        android:id="@+id/stage3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:alpha="0">
+
+        <TextView
+          android:id="@+id/s3Title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Use QR at the Station"
+          android:textColor="@color/m3_colorOnBackground"
+          android:textSize="26sp"
+          android:textStyle="bold"
+          android:letterSpacing="0.01" />
+
+        <TextView
+          android:id="@+id/s3Body"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="10dp"
+          android:text="Check in with your QR, start charging, and track the session in real time."
+          android:textColor="@color/m3_colorOnBackground"
+          android:textSize="15sp"
+          android:lineSpacingExtra="2dp" />
+      </LinearLayout>
+
+    </FrameLayout>
+  </com.google.android.material.card.MaterialCardView>
+
+  <!-- Tiny brand accent at the bottom (optional) -->
+  <TextView
+    android:id="@+id/tvBrandTag"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|center_horizontal"
+    android:layout_marginBottom="20dp"
+    android:text="@string/app_name"
+    android:textColor="@color/m3_colorPrimary"
+    android:textStyle="bold"
+    android:textSize="12sp"
+    android:alpha="0.9" />
+
+</FrameLayout>
