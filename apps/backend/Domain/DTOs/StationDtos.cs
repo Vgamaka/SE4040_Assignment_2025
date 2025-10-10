@@ -40,6 +40,7 @@ namespace EvCharge.Api.Domain.DTOs
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Type { get; set; } = "AC";
+        public string? BackOfficeNic { get; set; }
         public int Connectors { get; set; }
         public string Status { get; set; } = "Active";
         public bool AutoApproveEnabled { get; set; }  // NEW
@@ -57,6 +58,7 @@ namespace EvCharge.Api.Domain.DTOs
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Type { get; set; } = "AC";
+        public string? BackOfficeNic { get; set; }
         public int Connectors { get; set; }
         public string Status { get; set; } = "Active";
         public bool AutoApproveEnabled { get; set; }  // NEW

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/root"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/brand_background">
+
+  <LinearLayout
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Station selector row: search + logout -->
+    <LinearLayout
+      android:orientation="horizontal"
+      android:gravity="center_vertical"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+      <!-- Outline field (TextInputLayout) with a COMPAT AutoComplete inside -->
+      <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilStation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginEnd="12dp"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusTopStart="20dp"
+        app:boxCornerRadiusTopEnd="20dp"
+        app:boxCornerRadiusBottomStart="20dp"
+        app:boxCornerRadiusBottomEnd="20dp"
+        app:boxBackgroundColor="@color/brand_surface"
+        app:boxStrokeColor="@color/m3_colorPrimary"
+        app:boxStrokeWidth="1dp"
+        app:boxStrokeWidthFocused="2dp"
+        app:hintEnabled="true"
+        android:hint="@string/op_select_station">
+
+        <!-- Use AppCompatAutoCompleteTextView for maximum compatibility -->
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+          android:id="@+id/stationSearch"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:minHeight="56dp"
+          android:paddingStart="12dp"
+          android:paddingEnd="12dp"
+          android:textSize="16sp"
+          android:textColor="@color/m3_colorOnSurface"
+          android:textColorHint="@color/m3_colorOnSurfaceVariant"
+          android:dropDownHeight="220dp"
+          android:inputType="text"
+          android:singleLine="true"
+          android:contentDescription="@string/op_select_station" />
+      </com.google.android.material.textfield.TextInputLayout>
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogoutOp"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="@string/op_logout"
+        android:textAllCaps="false"
+        app:cornerRadius="24dp"
+        app:strokeColor="@color/m3_colorOutline"
+        app:strokeWidth="1dp"
+        app:backgroundTint="@color/brand_surface"
+        android:textColor="@color/m3_colorOnSurface" />
+    </LinearLayout>
+
+    <!-- Small embedded map (carded) -->
+    <com.google.android.material.card.MaterialCardView
+      android:layout_width="match_parent"
+      android:layout_height="150dp"
+      android:layout_marginTop="12dp"
+      app:cardCornerRadius="20dp"
+      app:cardUseCompatPadding="true"
+      app:cardElevation="6dp"
+      app:cardBackgroundColor="@color/brand_surface"
+      app:strokeColor="@color/m3_colorOutline"
+      app:strokeWidth="1dp">
+
+      <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/op_map_decorative"
+        android:importantForAccessibility="no"
+        android:focusable="false" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Filters -->
+    <HorizontalScrollView
+      android:layout_marginTop="12dp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:overScrollMode="never"
+      android:scrollbars="none">
+
+      <LinearLayout
+        android:id="@+id/filterRow"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp" />
+    </HorizontalScrollView>
+
+    <!-- List + pull-to-refresh -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+      android:id="@+id/swipe"
+      android:layout_marginTop="10dp"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1">
+
+      <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <ProgressBar
+      android:id="@+id/progress"
+      style="?android:attr/progressBarStyleLarge"
+      android:layout_gravity="center_horizontal"
+      android:layout_marginTop="8dp"
+      android:visibility="gone"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content" />
+  </LinearLayout>
+
+  <!-- Floating Scan button (extended) -->
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/fabScan"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|end"
+    android:layout_margin="16dp"
+    android:contentDescription="Scan QR"
+    android:src="@android:drawable/ic_menu_camera"
+    app:tint="#101010"
+    app:backgroundTint="#5DD62C" />
+
+  <!-- Scan overlay: dimmed scrim + centered card -->
+  <FrameLayout
+    android:id="@+id/scanOverlay"
+    android:visibility="gone"
+    android:background="#B3000000"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.card.MaterialCardView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      app:cardCornerRadius="24dp"
+      app:cardElevation="10dp"
+      app:cardBackgroundColor="@color/brand_surface"
+      app:strokeWidth="1dp"
+      app:strokeColor="@color/m3_colorOutline"
+      android:padding="16dp">
+
+      <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <TextView
+          android:text="@string/op_scan_qr_title"
+          android:textSize="18sp"
+          android:textStyle="bold"
+          android:textColor="@color/m3_colorOnBackground"
+          android:layout_marginBottom="10dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+
+        <androidx.camera.view.PreviewView
+          android:id="@+id/previewView"
+          android:layout_width="300dp"
+          android:layout_height="300dp"
+          android:background="@color/brand_surface" />
+
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnScanClose"
+          style="@style/Widget.Material3.Button.OutlinedButton"
+          android:layout_width="wrap_content"
+          android:layout_height="48dp"
+          android:layout_marginTop="14dp"
+          android:text="@string/op_close"
+          android:textAllCaps="false"
+          app:cornerRadius="24dp"
+          app:strokeColor="@color/m3_colorOutline"
+          app:strokeWidth="1dp"
+          app:backgroundTint="@color/brand_surface"
+          android:textColor="@color/m3_colorOnSurface" />
+      </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+  </FrameLayout>
+
+</FrameLayout>

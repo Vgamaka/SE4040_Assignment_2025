@@ -1,0 +1,16 @@
+<resources>
+  <string name="app_name">EvChargeAppJava</string>
+
+  <string name="operator_title">Operator — Inbox</string>
+  <string name="scan_qr">Scan QR</string>
+  <string name="get_directions">Get Directions</string>
+  <string name="op_select_station">Select station</string>
+  <string name="op_logout">Logout</string>
+  <string name="op_scan_qr_cta">Scan QR</string>
+  <string name="op_scan_qr_title">Scan QR</string>
+  <string name="op_close">Close</string>
+  <string name="op_map_decorative">Map (decorative)</string>
+
+
+
+</resources>

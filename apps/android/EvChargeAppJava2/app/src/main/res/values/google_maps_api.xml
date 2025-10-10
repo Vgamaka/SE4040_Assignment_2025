@@ -1,0 +1,4 @@
+<resources>
+    <!-- Replace with your real key from Google Cloud Console -->
+    <string name="google_maps_key">AIzaSyAEKepFgGssHp94zRkRIEZUttqfXDTpRUE</string>
+</resources>

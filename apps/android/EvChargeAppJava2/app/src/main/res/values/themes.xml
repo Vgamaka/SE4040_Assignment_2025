@@ -1,0 +1,83 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+  <!-- Base application theme (day). Keep DayNight parent for compatibility. -->
+  <style name="Base.Theme.EvChargeAppJava" parent="Theme.Material3.DayNight.NoActionBar">
+
+    <!-- Material 3 tokens -->
+    <item name="colorPrimary">@color/m3_colorPrimary</item>
+    <item name="colorOnPrimary">@color/m3_colorOnPrimary</item>
+    <item name="colorPrimaryContainer">@color/m3_colorPrimaryContainer</item>
+
+    <item name="colorSecondary">@color/m3_colorSecondary</item>
+    <item name="colorOnSecondary">@color/m3_colorOnSecondary</item>
+    <item name="colorSecondaryContainer">@color/m3_colorSecondaryContainer</item>
+
+    <item name="android:colorBackground">@color/m3_colorBackground</item>
+    <item name="colorOnBackground">@color/m3_colorOnBackground</item>
+
+    <item name="colorSurface">@color/m3_colorSurface</item>
+    <item name="colorOnSurface">@color/m3_colorOnSurface</item>
+
+    <item name="colorOutline">@color/m3_colorOutline</item>
+
+    <!-- Edge-to-edge & system bars -->
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    <item name="android:enforceNavigationBarContrast">false</item>
+    <item name="android:enforceStatusBarContrast">false</item>
+
+    <!-- Global background image (day); system will auto-swap with -night -->
+    <item name="android:windowBackground">@drawable/splash_bg</item>
+
+    <!-- Splash (Android 12+) -->
+    <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_splash_logo</item>
+    <!-- If you have a dedicated splash background, point to splash_bg; else it reuses bg_app -->
+    <item name="android:windowSplashScreenBackground">@drawable/splash_bg</item>
+    <!-- Optionally control the exit animation duration (ms) -->
+    <item name="android:windowSplashScreenAnimationDuration">300</item>
+
+    <!-- Shapes: rounded, neo-minimal -->
+    <item name="shapeAppearanceSmallComponent">@style/Shape.EvCharge.Small</item>
+    <item name="shapeAppearanceMediumComponent">@style/Shape.EvCharge.Medium</item>
+    <item name="shapeAppearanceLargeComponent">@style/Shape.EvCharge.Large</item>
+
+    <!-- Ripples: keep subtle on dark surfaces -->
+    <item name="rippleColor">@color/press_surface</item>
+  </style>
+
+  <style name="Theme.EvChargeAppJava" parent="Base.Theme.EvChargeAppJava" />
+
+  <!-- Shape appearances -->
+  <style name="Shape.EvCharge.Small" parent="ShapeAppearance.Material3.Corner.Full">
+    <item name="cornerFamily">rounded</item>
+    <item name="cornerSize">16dp</item>
+  </style>
+
+  <style name="Shape.EvCharge.Medium" parent="ShapeAppearance.Material3.Corner.Full">
+    <item name="cornerFamily">rounded</item>
+    <item name="cornerSize">18dp</item>
+  </style>
+
+  <style name="Shape.EvCharge.Large" parent="ShapeAppearance.Material3.Corner.Full">
+    <item name="cornerFamily">rounded</item>
+    <item name="cornerSize">20dp</item>
+  </style>
+  <!-- Text color for Spinner selected item + dropdown list -->
+  <style name="ThemeOverlay.EvCharge.Spinner" parent="">
+    <!-- Selected item (uses textColorPrimary) -->
+    <item name="android:textColorPrimary">@color/m3_colorOnSurface</item>
+    <!-- Dropdown row text -->
+    <item name="android:textColor">@color/m3_colorOnSurface</item>
+  </style>
+  <style name="Theme.EvCharge" parent="Theme.Material3.Dark.NoActionBar"/>
+
+  <!-- Make Date/Time pickers use brand green + light text on dark -->
+  <style name="ThemeOverlay.EvCharge.Pickers" parent="">
+    <item name="colorPrimary">@color/m3_colorPrimary</item>
+    <item name="colorOnPrimary">@color/brand_on_primary</item>
+    <item name="colorSecondary">@color/m3_colorPrimary</item>
+    <item name="colorOnSurface">@color/m3_colorOnSurface</item>
+  </style>
+
+</resources>

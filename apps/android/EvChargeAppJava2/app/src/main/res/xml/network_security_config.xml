@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+        Allow cleartext (HTTP) communication during development.
+        This enables the app to talk to your backend at:
+        - http://10.0.2.2:8085  (Android Emulator)
+        - http://<your-LAN-IP>:8085 (Physical device)
+        - http://<IIS-host-or-IP> (Later IIS deployment)
+    -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user"/>
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/rootStationDetail"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/brand_background">
+
+  <!-- Hero / Station photo -->
+  <ImageView
+    android:id="@+id/imgStationHero"
+    android:layout_width="match_parent"
+    android:layout_height="260dp"
+    android:scaleType="centerCrop"
+    android:contentDescription="Station image"
+    android:src="@drawable/station"
+    android:background="@color/brand_surface" />
+
+  <!-- Simple dark scrim over hero for contrast -->
+  <View
+    android:layout_width="match_parent"
+    android:layout_height="260dp"
+    android:background="#66000000" />
+
+  <!-- Scrollable content (with top inset so card sits under hero) -->
+  <ScrollView
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="200dp"
+    android:paddingBottom="120dp">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+      <!-- Floating information card -->
+      <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-40dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:cardUseCompatPadding="true"
+        app:cardBackgroundColor="@color/brand_surface"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/m3_colorOutline">
+
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical"
+          android:padding="20dp">
+
+          <!-- Station name -->
+          <TextView
+            android:id="@+id/tvName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Charge – Union Place"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.01"
+            android:lineSpacingExtra="2dp" />
+
+          <!-- Meta row -->
+          <TextView
+            android:id="@+id/tvMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Type: AC · Connectors: 2 · Status: Active"
+            android:textColor="@color/m3_colorOnSurfaceVariant"
+            android:textSize="14sp" />
+
+          <!-- Divider -->
+          <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@color/m3_colorOutline" />
+
+          <!-- Pricing -->
+          <TextView
+            android:id="@+id/tvPricing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pricing (flat): Base 250; PerHour 0; PerKwh 0; Tax 8%"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp" />
+
+          <!-- Weekly hours / schedule -->
+          <TextView
+            android:id="@+id/tvSchedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Weekly Hours:\nMon: 08:00–20:00\nTue: 08:00–20:00\nWed: 08:00–20:00\nThu: 08:00–20:00\nFri: 08:00–20:00\nSat: 09:00–18:00\nSun: closed"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp" />
+
+          <!-- Exceptions (optional; keep id so you can fill dynamically) -->
+          <TextView
+            android:id="@+id/tvExceptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Exceptions:\n2025-12-25: Closed"
+            android:textColor="@color/m3_colorOnSurface"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp" />
+
+        </LinearLayout>
+      </com.google.android.material.card.MaterialCardView>
+
+      <!-- Spacer so content breathes above the sticky CTA -->
+      <View
+        android:layout_width="match_parent"
+        android:layout_height="12dp" />
+    </LinearLayout>
+  </ScrollView>
+
+  <!-- Sticky bottom CTA -->
+  <com.google.android.material.button.MaterialButton
+    android:id="@+id/btnBookHere"
+    style="@style/Widget.Material3.Button"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:layout_gravity="bottom|center_horizontal"
+    android:layout_margin="20dp"
+    android:text="Book at this station"
+    android:textAllCaps="false"
+    app:cornerRadius="28dp"
+    app:backgroundTint="#5DD62C"
+    android:textColor="#0F0F0F"
+    android:elevation="2dp"
+    android:stateListAnimator="@null" />
+
+</FrameLayout>

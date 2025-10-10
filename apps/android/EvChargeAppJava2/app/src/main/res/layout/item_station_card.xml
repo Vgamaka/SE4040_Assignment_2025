@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:layout_marginBottom="12dp"
+  app:cardCornerRadius="20dp"
+  app:cardElevation="3dp"
+  app:cardUseCompatPadding="true"
+  app:cardBackgroundColor="@color/brand_surface"
+  android:foreground="?attr/selectableItemBackground"
+  android:clickable="true"
+  android:focusable="true">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Header row: optional thumbnail + titles -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:padding="14dp"
+      android:gravity="center_vertical">
+
+      <!-- Optional thumbnail (kept presentational; no ID so logic unaffected) -->
+      <ImageView
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="Station thumbnail"
+        android:src="@android:drawable/ic_menu_mylocation"
+        android:background="@color/brand_surface"
+        android:layout_marginEnd="12dp"
+        android:alpha="0.85" />
+
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+          android:id="@+id/tvStationTitle"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Station Name"
+          android:textStyle="bold"
+          android:textSize="18sp"
+          android:textColor="@color/m3_colorOnSurface"
+          android:ellipsize="end"
+          android:singleLine="true" />
+
+        <TextView
+          android:id="@+id/tvStationSub"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="2dp"
+          android:text="Address / City"
+          android:textSize="13sp"
+          android:textColor="#BDBDBD"
+          android:ellipsize="end"
+          android:singleLine="true" />
+      </LinearLayout>
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDirections"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="Get Directions"
+        android:textAllCaps="false"
+        app:cornerRadius="20dp"
+        app:strokeColor="@color/m3_colorOutline"
+        app:strokeWidth="1dp"
+        app:backgroundTint="@color/brand_surface"
+        android:textColor="@color/m3_colorOnSurface" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:background="@color/m3_colorOutline"
+      android:alpha="0.7" />
+
+    <!-- Dynamic bookings container (ID unchanged) -->
+    <LinearLayout
+      android:id="@+id/containerBookings"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:paddingStart="14dp"
+      android:paddingEnd="14dp"
+      android:paddingTop="10dp"
+      android:paddingBottom="12dp" />
+  </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
