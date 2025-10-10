@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function StationDashboard() {
+  const { logout } = useAuth();
   const user = JSON.parse(localStorage.getItem("user"));
   const stationId = user?.operatorStationIds?.[0];
 
   const [station, setStation] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const [form, setForm] = useState({
     localDate: "",
@@ -46,6 +49,10 @@ export default function StationDashboard() {
       setStation(res.data);
     } catch (err) {
       console.error("Error fetching station info:", err);
+      toast.error("Failed to fetch station information.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
@@ -56,6 +63,10 @@ export default function StationDashboard() {
       setBookings(res.data);
     } catch (err) {
       console.error("Error fetching bookings:", err);
+      toast.error("Failed to fetch bookings.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -66,22 +77,34 @@ export default function StationDashboard() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
     try {
       await api.post("/api/Booking", {
         ...form,
         stationId,
       });
-      setMessage("Booking created successfully!");
+      toast.success("Booking created successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+      });
       setForm({ localDate: "", startTime: "", minutes: "", notes: "" });
       fetchBookings();
     } catch (err) {
       console.error("Booking creation failed:", err);
       if (err.response?.status === 400)
-        setMessage("Bad request – check inputs.");
+        toast.error("Bad request – check inputs.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       else if (err.response?.status === 409)
-        setMessage("Conflict – slot full or station closed.");
-      else setMessage("An unexpected error occurred.");
+        toast.error("Conflict – slot full or station closed.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
+      else toast.error("An unexpected error occurred.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
@@ -106,33 +129,51 @@ export default function StationDashboard() {
   const handleApprove = async (id) => {
     try {
       await api.put(`/api/Booking/${id}/approve`);
-      setMessage("Booking approved successfully!");
+      toast.success("Booking approved successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       fetchBookings();
     } catch (err) {
       console.error("Error approving booking:", err);
-      setMessage("Failed to approve booking.");
+      toast.error("Failed to approve booking.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
   const handleReject = async (id) => {
     try {
       await api.put(`/api/Booking/${id}/reject`);
-      setMessage("Booking rejected successfully!");
+      toast.success("Booking rejected successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       fetchBookings();
     } catch (err) {
       console.error("Error rejecting booking:", err);
-      setMessage("Failed to reject booking.");
+      toast.error("Failed to reject booking.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
   const handleCancel = async (id) => {
     try {
       await api.post(`/api/Booking/${id}/cancel`);
-      setMessage("Booking cancelled successfully!");
+      toast.success("Booking cancelled successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       fetchBookings();
     } catch (err) {
       console.error("Error cancelling booking:", err);
-      setMessage("Failed to cancel booking.");
+      toast.error("Failed to cancel booking.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
@@ -169,7 +210,6 @@ export default function StationDashboard() {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
     try {
       await api.put(`/api/Booking/${editModal.bookingId}`, {
         localDate: editModal.localDate,
@@ -177,18 +217,34 @@ export default function StationDashboard() {
         minutes: parseInt(editModal.minutes),
         notes: editModal.notes,
       });
-      setMessage("Booking updated successfully!");
+      toast.success("Booking updated successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+      });
       closeEditModal();
       fetchBookings();
     } catch (err) {
       console.error("Booking update failed:", err);
       if (err.response?.status === 400)
-        setMessage("Bad request – check inputs.");
+        toast.error("Bad request – check inputs.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       else if (err.response?.status === 403)
-        setMessage("Forbidden – you cannot edit this booking.");
+        toast.error("Forbidden – you cannot edit this booking.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       else if (err.response?.status === 409)
-        setMessage("Conflict – slot full or station closed.");
-      else setMessage("An unexpected error occurred.");
+        toast.error("Conflict – slot full or station closed.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
+      else toast.error("An unexpected error occurred.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
@@ -231,15 +287,44 @@ export default function StationDashboard() {
                 Managing your charging station
               </p>
             </div>
+            <button
+              onClick={() => {
+                try {
+                  toast.info("Logging out...", {
+                    position: "top-right",
+                    autoClose: 2000,
+                  });
+                  // Slight delay for toast to be visible
+                  setTimeout(() => {
+                    logout();
+                  }, 1000);
+                } catch (error) {
+                  toast.error("Logout failed. Please try again.", {
+                    position: "top-right",
+                    autoClose: 5000,
+                  });
+                  console.error("Logout error:", error);
+                }
+              }}
+              className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-medium shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 transition-all duration-200"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
-        {/* Message Banner */}
-        {message && (
-          <div className="mb-6 p-4 bg-white border-l-4 border-blue-500 rounded-xl shadow-sm">
-            <p className="text-sm font-medium text-slate-700">{message}</p>
-          </div>
-        )}
+        {/* Toast Container */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
 
         {/* Station Info Card */}
         {station && (
