@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 export default function AdminDashboard() {
   const { token, username, logout } = useAuth();
 
@@ -27,9 +30,6 @@ export default function AdminDashboard() {
   });
 
   const [ownerLoading, setOwnerLoading] = useState(false);
-
-  // Message state
-  const [message, setMessage] = useState("");
 
   // BackOffice applications state
   const [backOffices, setBackOffices] = useState([]);
@@ -80,22 +80,37 @@ export default function AdminDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
 
     try {
       const { data } = await api.post("/api/Admin/admins", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setMessage(`Admin created successfully: ${data.fullName}`);
+      toast.success(`Admin created successfully: ${data.fullName}`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       setFormData({ fullName: "", email: "", phone: "", password: "" });
     } catch (error) {
       if (error.response?.status === 409) {
-        setMessage("An admin with this email or phone already exists.");
+        toast.error("An admin with this email or phone already exists.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else if (error.response?.status === 400) {
-        setMessage("Invalid data. Please check your inputs.");
+        toast.error("Invalid data. Please check your inputs.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else {
-        setMessage("Something went wrong. Please try again.");
+        toast.error("Something went wrong. Please try again.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     } finally {
       setLoading(false);
@@ -113,7 +128,6 @@ export default function AdminDashboard() {
   const handleOwnerSubmit = async (e) => {
     e.preventDefault();
     setOwnerLoading(true);
-    setMessage("");
 
     try {
       const payload = {
@@ -131,7 +145,15 @@ export default function AdminDashboard() {
 
       const { data } = await api.post("/api/EvOwner", payload);
 
-      setMessage(`EV Owner registered successfully: ${data.fullName}`);
+      toast.success(`EV Owner registered successfully: ${data.fullName}`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
       setOwnerFormData({
         nic: "",
         fullName: "",
@@ -147,14 +169,24 @@ export default function AdminDashboard() {
       console.error("Error response:", error.response?.data);
 
       if (error.response?.status === 409) {
-        setMessage("An owner with this NIC or email already exists.");
+        toast.error("An owner with this NIC or email already exists.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else if (error.response?.status === 400) {
         const errorData = error.response?.data;
-        setMessage(
-          `${errorData?.detail || "Invalid data. Please check your inputs."}`
+        toast.error(
+          `${errorData?.detail || "Invalid data. Please check your inputs."}`,
+          {
+            position: "top-right",
+            autoClose: 5000,
+          }
         );
       } else {
-        setMessage("Something went wrong. Please try again.");
+        toast.error("Something went wrong. Please try again.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     } finally {
       setOwnerLoading(false);
@@ -178,7 +210,10 @@ export default function AdminDashboard() {
       setTotal(data.total || 0);
     } catch (error) {
       console.error(error);
-      setMessage("Failed to fetch BackOffice applications.");
+      toast.error("Failed to fetch BackOffice applications.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } finally {
       setLoadingBackOffices(false);
     }
@@ -199,15 +234,30 @@ export default function AdminDashboard() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setMessage(`Application ${action}d successfully.`);
+      
+      toast.success(`Application ${action}d successfully.`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+      });
+      
       fetchBackOffices();
     } catch (error) {
       if (error.response?.status === 404) {
-        setMessage("Application not found.");
+        toast.error("Application not found.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else if (error.response?.status === 400) {
-        setMessage("Invalid notes or request data.");
+        toast.error("Invalid notes or request data.", {
+          position: "top-right", 
+          autoClose: 5000,
+        });
       } else {
-        setMessage("Failed to update application.");
+        toast.error("Failed to update application.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     } finally {
       setNoteModal({ show: false, nic: "", action: "", note: "" });
@@ -229,16 +279,18 @@ const fetchUsers = async () => {
       },
     });
 
-    setUsers(data.items || []);
-    setUserTotal(data.total || 0);
-  } catch (error) {
-    console.error(error);
-    setMessage("Failed to fetch Owner users.");
-  } finally {
-    setLoadingUsers(false);
-  }
-};
-
+      setUsers(data.items || []);
+      setUserTotal(data.total || 0);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch users.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -251,7 +303,6 @@ const fetchUsers = async () => {
 
   // -------------------- UPDATE EV OWNER --------------------
   const handleUpdateOwner = async () => {
-    setMessage("");
     try {
       const updateData = {
         fullName: editModal.fullName,
@@ -264,7 +315,12 @@ const fetchUsers = async () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setMessage(`User updated successfully.`);
+      toast.success("User updated successfully.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+      });
+      
       setEditModal({
         show: false,
         nic: "",
@@ -276,23 +332,37 @@ const fetchUsers = async () => {
       fetchUsers();
     } catch (error) {
       if (error.response?.status === 404) {
-        setMessage("User not found.");
+        toast.error("User not found.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else if (error.response?.status === 400) {
         const errorData = error.response?.data;
-        setMessage(`${errorData?.message || "Invalid data."}`);
+        toast.error(`${errorData?.message || "Invalid data."}`, {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else if (error.response?.status === 409) {
-        setMessage("Email already in use or concurrency conflict.");
+        toast.error("Email already in use or concurrency conflict.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else if (error.response?.status === 403) {
-        setMessage("You don't have permission to update this user.");
+        toast.error("You don't have permission to update this user.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else {
-        setMessage("Failed to update user.");
+        toast.error("Failed to update user.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     }
   };
 
   // -------------------- ACTIVATE / DEACTIVATE EV OWNER --------------------
   const handleToggleUserStatus = async (nic, isActive) => {
-    setMessage("");
     try {
       const endpoint = isActive
         ? `/api/EvOwner/${nic}/deactivate`
@@ -306,17 +376,32 @@ const fetchUsers = async () => {
         }
       );
 
-      setMessage(
-        `User ${isActive ? "deactivated" : "reactivated"} successfully.`
+      toast.success(
+        `User ${isActive ? "deactivated" : "reactivated"} successfully.`,
+        {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+        }
       );
+      
       fetchUsers(); // Refresh the user list
     } catch (error) {
       if (error.response?.status === 404) {
-        setMessage("User not found.");
+        toast.error("User not found.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else if (error.response?.status === 403) {
-        setMessage("You don't have permission to modify this user.");
+        toast.error("You don't have permission to modify this user.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       } else {
-        setMessage("Failed to update user status.");
+        toast.error("Failed to update user status.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     }
   };
@@ -338,7 +423,24 @@ const fetchUsers = async () => {
               </p>
             </div>
             <button
-              onClick={logout}
+              onClick={() => {
+                try {
+                  toast.info("Logging out...", {
+                    position: "top-right",
+                    autoClose: 2000,
+                  });
+                  // Slight delay for toast to be visible
+                  setTimeout(() => {
+                    logout();
+                  }, 1000);
+                } catch (error) {
+                  toast.error("Logout failed. Please try again.", {
+                    position: "top-right",
+                    autoClose: 5000,
+                  });
+                  console.error("Logout error:", error);
+                }
+              }}
               className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-medium shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 transition-all duration-200"
             >
               Logout
@@ -346,12 +448,18 @@ const fetchUsers = async () => {
           </div>
         </div>
 
-        {/* Message Banner */}
-        {message && (
-          <div className="mb-6 p-4 bg-white border-l-4 border-blue-500 rounded-xl shadow-sm">
-            <p className="text-sm font-medium text-slate-700">{message}</p>
-          </div>
-        )}
+        {/* Toast Container */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* --- Section 1: Forms --- */}
