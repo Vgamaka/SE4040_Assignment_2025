@@ -1,50 +1,54 @@
-import { createContext, useContext, useState } from "react";
-import api from "../services/api";
+import { createContext, useContext, useState, useEffect } from "react";
+import { login as apiLogin, logout as apiLogout, getUser, getToken } from "../services/api";
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  const [role, setRole] = useState(localStorage.getItem("role"));
-  const [username, setUsername] = useState(localStorage.getItem("username"));
-  
-  const login = async (username, password, asOwner = false) => {
-    const url = asOwner ? "/api/auth/owner/login" : "/api/auth/login";
-    const { data } = await api.post(url, { username, password });
-    
-    // Store individual items for backward compatibility
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.role);
-    localStorage.setItem("username", data.username);
-    
-    // Store user object for ProtectedRoute component
-    const userData = {
-      username: data.username,
-      roles: [data.role],
-      // Add any other required fields here
+  // hydrate from storage that services/api.js manages
+  const [token, setToken] = useState(getToken());
+  const [user, setUser] = useState(getUser());
+
+  // derived for backward-compat with pages using username/role
+  const username = user?.fullName || user?.nic || "";
+  const role = Array.isArray(user?.roles) && user.roles.length ? user.roles[0] : null;
+
+  // keep local state in sync if other tabs change storage
+  useEffect(() => {
+    const onStorage = () => {
+      setToken(getToken());
+      setUser(getUser());
     };
-    localStorage.setItem("user", JSON.stringify(userData));
-    
-    setToken(data.token);
-    setRole(data.role);
-    setUsername(data.username);
-    
-    return data.role; // Return role for navigation purposes
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const login = async (username, password) => {
+    // unified login: username (NIC or email), password
+    const data = await apiLogin({ username, password });
+    // apiLogin persists token + user for us; just reflect to state
+    setToken(data?.accessToken || getToken());
+    setUser(data || getUser());
+    // return primary role for caller navigation convenience
+    return Array.isArray(data?.roles) && data.roles.length ? data.roles[0] : null;
   };
 
   const logout = () => {
-    localStorage.clear();
-    setToken(null);
-    setRole(null);
-    setUsername(null);
-    
-    // Force navigation to login page
-    window.location.href = "/login";
+    apiLogout(); // clears storage and hard-redirects to "/"
   };
 
   return (
-    <AuthContext.Provider value={{ token, role, username, login, logout, isAuthed: !!token }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        role,
+        username,
+        user,
+        login,
+        logout,
+        isAuthed: !!token,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
